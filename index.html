@@ -8,7 +8,45 @@
 </head>
 
 <body>
-TBSG
+<p id="test_results">
+  Waiting for tests to run...
+</p>
+<p id="map">
+  Starting...
+</p>
+
+<script>
+
+  const render = () => "T";
+  
+  {
+    const assertEqual = (expected, result, message) => {
+      if (expected !== result){
+        throw new Error(`Expected ${result} to be ${expected} when ${message}`);
+      }
+    };
+    
+    const testResults = document.getElementById("test_results");
+    
+    rendersTile = () => {
+       const result = render();
+        assertEqual("T", result, "rendering tile");
+      };
+      
+    try{
+      rendersTile();
+      
+      testResults.textContent = "Tests passed: 1"
+    }
+    catch (error) {
+      testResults.textContent = `Test failed: ${error.message}`
+    }
+  }
+  
+  const map = document.getElementById("map");
+  map.textContent = render();
+  
+</script>
 </body>
 
 </html>
