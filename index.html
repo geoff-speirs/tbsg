@@ -7,44 +7,53 @@
   <title></title>
 </head>
 
-<body>
-<p id="test_results">
-  Waiting for tests to run...
+<body></body>
+<p id="test_failures">
 </p>
-<p id="map">
+<p id="map" style="white-space: pre;">
   Starting...
 </p>
 
 <script>
-
-  const render = () => "T";
+  const render = (map) => {
+    return map.map((lines) => lines.map(tile => "T").join("")).join("\n");
+  };
   
   {
-    const assertEqual = (expected, result, message) => {
+    const assertEqual = (expected, result) => {
       if (expected !== result){
-        throw new Error(`Expected ${result} to be ${expected} when ${message}`);
+        throw new Error(`Expected ${result} to be ${expected}`);
       }
     };
     
-    const testResults = document.getElementById("test_results");
-    
-    rendersTile = () => {
-       const result = render();
-        assertEqual("T", result, "rendering tile");
-      };
-      
-    try{
-      rendersTile();
-      
-      testResults.textContent = "Tests passed: 1"
-    }
-    catch (error) {
-      testResults.textContent = `Test failed: ${error.message}`
-    }
+    tests = [
+      ["renders tiles", 
+      [
+        ["T", [[1]]],
+        ["TT", [[1,2]]],
+        ["TT\nTT", [[1,2],[3,4]]]
+      ],
+      (expected, data) => {
+        const result = render(data);
+        assertEqual(expected, result);
+      }]
+    ];
+  
+    var failures = [];
+    tests.forEach(([description, dataList, test]) => dataList.forEach(([expected, data]) => {
+        try{
+          test(expected, data);
+        }
+        catch (error) {
+          failures.push(`Error in ${description}: ${error.message}`);
+        }
+      })
+    );
+    document.getElementById("test_failures").textContent = failures.join("\r\n");
   }
   
   const map = document.getElementById("map");
-  map.textContent = render();
+  map.textContent = render([[1,2],[3,4]]);
   
 </script>
 </body>
