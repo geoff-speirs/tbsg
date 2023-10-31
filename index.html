@@ -14,9 +14,17 @@
   Starting...
 </p>
 
-<script>
+<script>  
+  class Player {
+    constructor(){
+    }
+  }
+  
   const render = (map) => {
-    return map.map((lines) => lines.map(tile => "T").join("")).join("\n");
+    return map.map((lines) => lines.map(tile => { 
+        if (tile instanceof Player) return "P";
+        return "T";
+      }).join("")).join("\n");
   };
   
   {
@@ -28,15 +36,25 @@
     
     tests = [
       ["renders tiles", 
-      [
-        ["T", [[1]]],
-        ["TT", [[1,2]]],
-        ["TT\nTT", [[1,2],[3,4]]]
+        [
+          ["T", [[1]]],
+          ["TT", [[1,2]]],
+          ["TT\nTT", [[1,2],[3,4]]]
+        ],
+        (expected, data) => {
+          const result = render(data);
+          assertEqual(expected, result);
+        }
       ],
-      (expected, data) => {
-        const result = render(data);
-        assertEqual(expected, result);
-      }]
+      ["renders player",
+        [
+          ["TT\nTP", [[[1,2],[3,new Player()]]]]
+        ],
+        (expected, [data]) => {
+          const result = render(data);
+          assertEqual(expected, result);
+        }
+      ]
     ];
   
     var failures = [];
@@ -53,7 +71,7 @@
   }
   
   const map = document.getElementById("map");
-  map.textContent = render([[1,2],[3,4]]);
+  map.textContent = render([[1,2],[3,new Player()]]);
   
 </script>
 </body>
