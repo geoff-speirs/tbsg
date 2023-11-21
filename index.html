@@ -16,7 +16,27 @@
 
 <script>  
   class Player {
-    constructor(){
+    constructor(x, y){
+      this.x = x;
+      this.y = y;
+    }
+    moveRight(){
+      this.x = this.x + 1;
+    }
+  }
+  
+  const PlayerCommand = {
+    MoveRight: "MoveRight"
+  }
+  
+  class Game {
+    constructor(player){
+      this.player = player;
+    }
+    update(command){
+      if (command === PlayerCommand.MoveRight){
+        this.player.moveRight();
+      }
     }
   }
   
@@ -41,26 +61,38 @@
           ["TT", [[1,2]]],
           ["TT\nTT", [[1,2],[3,4]]]
         ],
-        (expected, data) => {
+        ([expected, data]) => {
           const result = render(data);
           assertEqual(expected, result);
         }
       ],
       ["renders player",
         [
-          ["TT\nTP", [[[1,2],[3,new Player()]]]]
+          ["TT\nTP", [[1,2],[3,new Player()]]]
         ],
-        (expected, [data]) => {
+        ([expected, data]) => {
           const result = render(data);
           assertEqual(expected, result);
+        }
+      ],
+      ["moves player",
+        [
+          [[1, 0], [0, 0], PlayerCommand.MoveRight]
+        ],
+        ([[expectedX, expectedY], [startX, startY], command]) => {
+          player = new Player(startX, startY);
+          game = new Game(player);
+          game.update(command, player);
+          assertEqual(expectedX, game.player.x);
+          assertEqual(expectedY, game.player.y);
         }
       ]
     ];
   
     var failures = [];
-    tests.forEach(([description, dataList, test]) => dataList.forEach(([expected, data]) => {
+    tests.forEach(([description, dataList, test]) => dataList.forEach((data) => {
         try{
-          test(expected, data);
+          test(data);
         }
         catch (error) {
           failures.push(`Error in ${description}: ${error.message}`);
