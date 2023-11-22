@@ -26,11 +26,19 @@
     moveLeft(){
       this.x -= 1;
     }
+    moveDown(){
+      this.y += 1;
+    }
+    moveUp(){
+      this.y -= 1;
+    }
   }
   
   const PlayerCommand = {
     MoveRight: "MoveRight",
-    MoveLeft: "MoveLeft"
+    MoveLeft: "MoveLeft",
+    MoveDown: "MoveDown",
+    MoveUp: "MoveUp"
   }
   
   class Game {
@@ -42,6 +50,10 @@
         this.player.moveRight();
       } else if (command === PlayerCommand.MoveLeft){
         this.player.moveLeft();
+      } else if (command === PlayerCommand.MoveDown){
+        this.player.moveDown();
+      } else if (command === PlayerCommand.MoveUp) {
+        this.player.moveUp();
       }
     }
   }
@@ -85,7 +97,9 @@
       ["moving player",
         [
           [[1, 0], [0, 0], PlayerCommand.MoveRight, "right"],
-          [[0, 0], [1, 0], PlayerCommand.MoveLeft, "left"]
+          [[0, 0], [1, 0], PlayerCommand.MoveLeft, "left"],
+          [[0, 1], [0, 0], PlayerCommand.MoveDown, "down"],
+          [[0, 0], [0, 1], PlayerCommand.MoveUp, "up"]
         ],
         ([[expectedX, expectedY], [startX, startY], command, message]) => {
           player = new Player(startX, startY);
