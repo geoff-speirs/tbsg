@@ -21,12 +21,16 @@
       this.y = y;
     }
     moveRight(){
-      this.x = this.x + 1;
+      this.x += 1;
+    }
+    moveLeft(){
+      this.x -= 1;
     }
   }
   
   const PlayerCommand = {
-    MoveRight: "MoveRight"
+    MoveRight: "MoveRight",
+    MoveLeft: "MoveLeft"
   }
   
   class Game {
@@ -36,6 +40,8 @@
     update(command){
       if (command === PlayerCommand.MoveRight){
         this.player.moveRight();
+      } else if (command === PlayerCommand.MoveLeft){
+        this.player.moveLeft();
       }
     }
   }
@@ -48,14 +54,15 @@
   };
   
   {
-    const assertEqual = (expected, result) => {
+    const assertEqual = (expected, result, message) => {
       if (expected !== result){
-        throw new Error(`Expected ${result} to be ${expected}`);
+        const detailMsg = message ?? "";
+        throw new Error(`${detailMsg}: Expected ${result} to be ${expected}`);
       }
     };
     
     tests = [
-      ["renders tiles", 
+      ["rendering tiles", 
         [
           ["T", [[1]]],
           ["TT", [[1,2]]],
@@ -66,7 +73,7 @@
           assertEqual(expected, result);
         }
       ],
-      ["renders player",
+      ["rendering player",
         [
           ["TT\nTP", [[1,2],[3,new Player()]]]
         ],
@@ -75,16 +82,17 @@
           assertEqual(expected, result);
         }
       ],
-      ["moves player",
+      ["moving player",
         [
-          [[1, 0], [0, 0], PlayerCommand.MoveRight]
+          [[1, 0], [0, 0], PlayerCommand.MoveRight, "right"],
+          [[0, 0], [1, 0], PlayerCommand.MoveLeft, "left"]
         ],
-        ([[expectedX, expectedY], [startX, startY], command]) => {
+        ([[expectedX, expectedY], [startX, startY], command, message]) => {
           player = new Player(startX, startY);
           game = new Game(player);
           game.update(command, player);
-          assertEqual(expectedX, game.player.x);
-          assertEqual(expectedY, game.player.y);
+          assertEqual(expectedX, game.player.x, message);
+          assertEqual(expectedY, game.player.y, message);
         }
       ]
     ];
@@ -95,11 +103,11 @@
           test(data);
         }
         catch (error) {
-          failures.push(`Error in ${description}: ${error.message}`);
+          failures.push(`Error ${description} ${error.message}`);
         }
       })
     );
-    document.getElementById("test_failures").textContent = failures.join("\r\n");
+    document.getElementById("test_failures").textContent = failures.join("\n");
   }
   
   const map = document.getElementById("map");
