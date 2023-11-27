@@ -7,11 +7,14 @@
   <title></title>
 </head>
 
-<body></body>
+<body>
 <p id="test_failures" style="white-space: pre;">
 </p>
 <p id="map" style="white-space: pre;">
   Starting...
+</p>
+<p>
+  <button type="button" id="j_button">J</button>
 </p>
 
 <script>  
@@ -42,8 +45,9 @@
   }
   
   class Game {
-    constructor(player){
+    constructor(player, map){
       this.player = player;
+      this.map = map;
     }
     update(command){
       if (command === PlayerCommand.MoveRight){
@@ -64,6 +68,10 @@
         return "T";
       }).join("")).join("\n");
   };
+  
+  const map = document.getElementById("map");
+  
+  
   
   {
     const assertEqual = (expected, result, message) => {
@@ -102,8 +110,8 @@
           [[0, 0], [0, 1], PlayerCommand.MoveUp, "up"]
         ],
         ([[expectedX, expectedY], [startX, startY], command, message]) => {
-          player = new Player(startX, startY);
-          game = new Game(player);
+          const player = new Player(startX, startY);
+          const game = new Game(player);
           game.update(command, player);
           assertEqual(expectedX, game.player.x, message);
           assertEqual(expectedY, game.player.y, message);
@@ -124,8 +132,40 @@
     document.getElementById("test_failures").textContent = failures.join("\n");
   }
   
-  const map = document.getElementById("map");
-  map.textContent = render([[1,2],[3,new Player()]]);
+  const mapElem = document.getElementById("map");
+  class Engine {
+    constructor(game){
+      this.game = game;
+      render(game.map);//render initial
+    }
+    
+    progress(command){
+      game.update(command);
+      mapElem.textContent = render(game.map);
+    }
+  }
+  
+  const player = new Player(0, 0);
+  const game = new Game(player, [["T", "T"], ["T", "T"]]);
+  const engine = new Engine(game);
+  mapElem.textContent = render(game.map);
+  
+  
+  
+  
+  
+  document.addEventListener("keydown", (event) => {
+    switch (event.code) {
+      case "KeyJ":
+        game.update(PlayerCommand.MoveDown);
+        break;
+    }
+  });
+  
+  document.getElementById("j_button").onclick = (event) => {
+    engine.progress(PlayerCommand.MoveDown)
+  };
+  
   
 </script>
 </body>
