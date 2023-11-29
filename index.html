@@ -20,20 +20,20 @@
 <script>  
   class Player {
     constructor(x, y){
-      this.x = x;
-      this.y = y;
+      this.down = x;
+      this.right = y;
     }
     moveRight(){
-      this.x += 1;
+      this.right += 1;
     }
     moveLeft(){
-      this.x -= 1;
+      this.right -= 1;
     }
     moveDown(){
-      this.y += 1;
+      this.down += 1;
     }
     moveUp(){
-      this.y -= 1;
+      this.down -= 1;
     }
   }
   
@@ -45,9 +45,9 @@
   }
   
   class Game {
-    constructor(player, map){
-      this.player = player;
+    constructor(map, player){
       this.map = map;
+      this.player = player;
     }
     update(command){
       if (command === PlayerCommand.MoveRight){
@@ -62,11 +62,30 @@
     }
   }
   
-  const render = (map) => {
-    return map.map((lines) => lines.map(tile => { 
-        if (tile instanceof Player) return "P";
-        return "T";
-      }).join("")).join("\n");
+  const DisplayTile = {
+    GroundTile: "GroundTile",
+    PlayerTile: "PlayerTile"
+  }
+  
+  
+  const generateTiles = (game) => {
+    var tiles = game.map.map((lines) => lines.map(tile => DisplayTile.GroundTile));
+    tiles[game.player.down][game.player.right] = DisplayTile.PlayerTile;
+    return tiles;
+  };
+  
+  const render = (tiles) => {
+    var tiles = tiles.map((lines) => lines.map(tile => {
+        switch(tile){
+          case DisplayTile.GroundTile:
+          return "G";
+          case DisplayTile.PlayerTile:
+          return "P";
+        }
+      }
+      ).join("")).join("\n");
+    tiles[game.player.down][game.player.right] = "P";
+    return tiles;
   };
   
   const map = document.getElementById("map");
@@ -82,39 +101,28 @@
     };
     
     tests = [
-      ["rendering tiles", 
+      ["generates player tile",
         [
-          ["T", [[1]]],
-          ["TT", [[1,2]]],
-          ["TT\nTT", [[1,2],[3,4]]]
+          [DisplayTile.PlayerTile, [[1]]]
         ],
         ([expected, data]) => {
-          const result = render(data);
-          assertEqual(expected, result);
-        }
-      ],
-      ["rendering player",
-        [
-          ["TT\nTP", [[1,2],[3,new Player()]]]
-        ],
-        ([expected, data]) => {
-          const result = render(data);
-          assertEqual(expected, result);
+          const result = generateTiles(new Game(data, new Player(0,0)));
+          assertEqual(expected, result[0][0]);
         }
       ],
       ["moving player",
         [
-          [[1, 0], [0, 0], PlayerCommand.MoveRight, "right"],
-          [[0, 0], [1, 0], PlayerCommand.MoveLeft, "left"],
-          [[0, 1], [0, 0], PlayerCommand.MoveDown, "down"],
-          [[0, 0], [0, 1], PlayerCommand.MoveUp, "up"]
+          [[0, 1], [0, 0], PlayerCommand.MoveRight, "right"],
+          [[0, 0], [0, 1], PlayerCommand.MoveLeft, "left"],
+          [[1, 0], [0, 0], PlayerCommand.MoveDown, "down"],
+          [[0, 0], [1, 0], PlayerCommand.MoveUp, "up"]
         ],
-        ([[expectedX, expectedY], [startX, startY], command, message]) => {
+        ([[expectedDown, expectedRight], [startX, startY], command, message]) => {
           const player = new Player(startX, startY);
-          const game = new Game(player);
+          const game = new Game([[1,2],[3,4]], player);
           game.update(command, player);
-          assertEqual(expectedX, game.player.x, message);
-          assertEqual(expectedY, game.player.y, message);
+          assertEqual(expectedDown, game.player.down, message);
+          assertEqual(expectedRight, game.player.right, message);
         }
       ]
     ];
@@ -136,23 +144,22 @@
   class Engine {
     constructor(game){
       this.game = game;
-      render(game.map);//render initial
+      const tiles = generateTiles(game);
+      mapElem.textContent = render(tiles);//render initial
     }
     
     progress(command){
       game.update(command);
-      mapElem.textContent = render(game.map);
+      const tiles = generateTiles(game);
+      mapElem.textContent = render(tiles);
     }
   }
   
   const player = new Player(0, 0);
-  const game = new Game(player, [["T", "T"], ["T", "T"]]);
+  const game = new Game([["T", "T"], ["T", "T"]], player);
   const engine = new Engine(game);
-  mapElem.textContent = render(game.map);
-  
-  
-  
-  
+  const tiles = generateTiles(game);
+  mapElem.textContent = render(tiles);
   
   document.addEventListener("keydown", (event) => {
     switch (event.code) {
