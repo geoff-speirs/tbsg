@@ -84,13 +84,8 @@
         }
       }
       ).join("")).join("\n");
-    tiles[game.player.down][game.player.right] = "P";
     return tiles;
   };
-  
-  const map = document.getElementById("map");
-  
-  
   
   {
     const assertEqual = (expected, result, message) => {
@@ -101,13 +96,32 @@
     };
     
     tests = [
-      ["generates player tile",
+      ["generate player tile",
         [
           [DisplayTile.PlayerTile, [[1]]]
         ],
         ([expected, data]) => {
           const result = generateTiles(new Game(data, new Player(0,0)));
           assertEqual(expected, result[0][0]);
+        }
+      ],
+      ["generates ground tiles",
+        [
+          [DisplayTile.GroundTile]
+        ],
+        ([expected]) => {
+          const result = generateTiles(new Game([[0], [1]], new Player(0, 1)));
+          assertEqual(expected, result[0][0]);
+        }
+      ],
+      ["renders tiles",
+        [
+          ["G\nP", [[DisplayTile.GroundTile],[DisplayTile.PlayerTile]]
+          ]
+        ],
+        ([expected, tiles]) => {
+          const result = render(tiles);
+          assertEqual(expected, result);
         }
       ],
       ["moving player",
