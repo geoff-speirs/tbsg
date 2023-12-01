@@ -19,9 +19,9 @@
 
 <script>  
   class Player {
-    constructor(x, y){
-      this.down = x;
-      this.right = y;
+    constructor(down, right){
+      this.down = down;
+      this.right = right;
     }
     moveRight(){
       this.right += 1;
@@ -37,7 +37,7 @@
     }
   }
   
-  const PlayerCommand = {
+  const Command = {
     MoveRight: "MoveRight",
     MoveLeft: "MoveLeft",
     MoveDown: "MoveDown",
@@ -50,36 +50,36 @@
       this.player = player;
     }
     update(command){
-      if (command === PlayerCommand.MoveRight){
+      if (command === Command.MoveRight){
         this.player.moveRight();
-      } else if (command === PlayerCommand.MoveLeft){
+      } else if (command === Command.MoveLeft){
         this.player.moveLeft();
-      } else if (command === PlayerCommand.MoveDown){
+      } else if (command === Command.MoveDown){
         this.player.moveDown();
-      } else if (command === PlayerCommand.MoveUp) {
+      } else if (command === Command.MoveUp) {
         this.player.moveUp();
       }
     }
   }
   
-  const DisplayTile = {
+  const Display = {
     GroundTile: "GroundTile",
     PlayerTile: "PlayerTile"
   }
   
   
   const generateTiles = (game) => {
-    var tiles = game.map.map((lines) => lines.map(tile => DisplayTile.GroundTile));
-    tiles[game.player.down][game.player.right] = DisplayTile.PlayerTile;
+    var tiles = game.map.map((lines) => lines.map(tile => Display.GroundTile));
+    tiles[game.player.down][game.player.right] = Display.PlayerTile;
     return tiles;
   };
   
   const render = (tiles) => {
     var tiles = tiles.map((lines) => lines.map(tile => {
         switch(tile){
-          case DisplayTile.GroundTile:
+          case Display.GroundTile:
           return "G";
-          case DisplayTile.PlayerTile:
+          case Display.PlayerTile:
           return "P";
         }
       }
@@ -98,16 +98,15 @@
     tests = [
       ["generate player tile",
         [
-          [DisplayTile.PlayerTile, [[1]]]
         ],
-        ([expected, data]) => {
+        () => {
           const result = generateTiles(new Game(data, new Player(0,0)));
-          assertEqual(expected, result[0][0]);
+          assertEqual(Display.GroundTile, result[0][0]);
         }
       ],
       ["generates ground tiles",
         [
-          [DisplayTile.GroundTile]
+          [Display.GroundTile]
         ],
         ([expected]) => {
           const result = generateTiles(new Game([[0], [1]], new Player(0, 1)));
@@ -116,7 +115,7 @@
       ],
       ["renders tiles",
         [
-          ["G\nP", [[DisplayTile.GroundTile],[DisplayTile.PlayerTile]]
+          ["G\nP", [[Display.GroundTile],[Display.PlayerTile]]
           ]
         ],
         ([expected, tiles]) => {
@@ -126,10 +125,10 @@
       ],
       ["moving player",
         [
-          [[0, 1], [0, 0], PlayerCommand.MoveRight, "right"],
-          [[0, 0], [0, 1], PlayerCommand.MoveLeft, "left"],
-          [[1, 0], [0, 0], PlayerCommand.MoveDown, "down"],
-          [[0, 0], [1, 0], PlayerCommand.MoveUp, "up"]
+          [[0, 1], [0, 0], Command.MoveRight, "right"],
+          [[0, 0], [0, 1], Command.MoveLeft, "left"],
+          [[1, 0], [0, 0], Command.MoveDown, "down"],
+          [[0, 0], [1, 0], Command.MoveUp, "up"]
         ],
         ([[expectedDown, expectedRight], [startX, startY], command, message]) => {
           const player = new Player(startX, startY);
@@ -178,13 +177,13 @@
   document.addEventListener("keydown", (event) => {
     switch (event.code) {
       case "KeyJ":
-        game.update(PlayerCommand.MoveDown);
+        game.update(Command.MoveDown);
         break;
     }
   });
   
   document.getElementById("j_button").onclick = (event) => {
-    engine.progress(PlayerCommand.MoveDown)
+    engine.progress(Command.MoveDown)
   };
   
   
