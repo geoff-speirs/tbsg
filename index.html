@@ -67,7 +67,6 @@
     PlayerTile: "PlayerTile"
   }
   
-  
   const generateTiles = (game) => {
     var tiles = game.map.map((lines) => lines.map(tile => Display.GroundTile));
     tiles[game.player.down][game.player.right] = Display.PlayerTile;
@@ -98,10 +97,11 @@
     tests = [
       ["generate player tile",
         [
+          [0,0], [1,1]
         ],
-        () => {
-          const result = generateTiles(new Game(data, new Player(0,0)));
-          assertEqual(Display.GroundTile, result[0][0]);
+        ([down, right]) => {
+          const result = generateTiles(new Game([[1,2],[3,4]], new Player(down, right)));
+          assertEqual(Display.PlayerTile, result[down][right]);
         }
       ],
       ["generates ground tiles",
