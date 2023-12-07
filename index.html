@@ -95,7 +95,7 @@
     };
     
     tests = [
-      ["generate player tile",
+      ["generating player tile",
         [
           [0,0], [1,1]
         ],
@@ -104,16 +104,16 @@
           assertEqual(Display.PlayerTile, result[down][right]);
         }
       ],
-      ["generates ground tiles",
+      ["generating ground tiles",
         [
-          [Display.GroundTile]
+          [0,0], [1,1]
         ],
-        ([expected]) => {
-          const result = generateTiles(new Game([[0], [1]], new Player(0, 1)));
-          assertEqual(expected, result[0][0]);
+        ([down, right]) => {
+          const result = generateTiles(new Game([[0,1], [2,3]], new Player(0, 1)));
+          assertEqual(Display.GroundTile, result[down][right]);
         }
       ],
-      ["renders tiles",
+      ["rendering tiles",
         [
           ["G\nP", [[Display.GroundTile],[Display.PlayerTile]]
           ]
