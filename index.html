@@ -14,7 +14,10 @@
   Starting...
 </p>
 <p>
+  <button type="button" id="h_button">H</button>
   <button type="button" id="j_button">J</button>
+  <button type="button" id="k_button">K</button>
+  <button type="button" id="l_button">L</button>
 </p>
 
 <script>  
@@ -176,14 +179,32 @@
   
   document.addEventListener("keydown", (event) => {
     switch (event.code) {
+      case "KeyH":
+        game.update(Command.MoveLrft);
+        break;
       case "KeyJ":
         game.update(Command.MoveDown);
+        break;
+      case "KeyK":
+        game.update(Command.MoveUp);
+        break;
+      case "KeyL":
+        game.update(Command.MoveRight);
         break;
     }
   });
   
+  document.getElementById("h_button").onclick = (event) => {
+    engine.progress(Command.MoveLeft)
+  };  
   document.getElementById("j_button").onclick = (event) => {
     engine.progress(Command.MoveDown)
+  };  
+  document.getElementById("k_button").onclick = (event) => {
+    engine.progress(Command.MoveUp)
+  };  
+  document.getElementById("l_button").onclick = (event) => {
+    engine.progress(Command.MoveRight)
   };
   
   
