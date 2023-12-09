@@ -20,9 +20,13 @@
   <button type="button" id="l_button">L</button>
 </p>
 
-<script>  
+<script>
+  class PlayerPosError extends Error {}
   class Player {
     constructor(down, right){
+      if (down < 0 || right < 0) {
+        throw new PlayerPosError();
+      }
       this.down = down;
       this.right = right;
     }
@@ -96,7 +100,18 @@
         throw new Error(`${detailMsg}: Expected ${result} to be ${expected}`);
       }
     };
-    
+    class NotCalledError{}
+    const assertThrows = (func, errorClass, message) => {
+      try {
+            func();
+            throw new NotCalledError();
+          } catch (e) {
+            if (e instanceof NotCalledError) throw new Error(": Exception not thrown.");
+            if (!(e instanceof errorClass)){
+              throw new Error(`: Expected error of class ${errorClass.name}`);
+            };
+          }
+    };
     tests = [
       ["generating player tile",
         [
@@ -139,6 +154,14 @@
           game.update(command, player);
           assertEqual(expectedDown, game.player.down, message);
           assertEqual(expectedRight, game.player.right, message);
+        }
+      ],
+      ["validating non-negative player start pos",
+        [[0, -1], [-1, 0]],
+        ([right, down]) => {
+          assertThrows(() => {
+            new Player(right, down);
+          }, PlayerPosError);
         }
       ]
     ];
