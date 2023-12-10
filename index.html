@@ -21,6 +21,54 @@
 </p>
 
 <script>
+{
+  const checkTypes = () => {};
+  class NothingThrownError extends Error {}
+  class WrongErrorError extends Error {}
+  const assertThrows = (func, errorClass, message = "") => {
+    try {
+      func();
+      throw new NothingThrownError();
+    } catch (e) {
+      if (!(e instanceof errorClass)){
+        throw new WrongErrorError(`Expected error of class ${errorClass.name} to he thrown.`);
+      }
+      if (e instanceof NothingThrownError){
+        throw e;
+      }
+    }
+  }
+  {
+    assertThrows(()=>{
+      throw new Error();
+    }, Error);
+    
+    class TestError extends Error {}
+    try {
+      assertThrows(() => {
+        throw new Error();
+      }, TestError);
+    } catch (e) {
+      if (!(e instanceof WrongErrorError)){
+        throw new Error("assertThrows should throw WrongErrorError if wrong error was thrown.");
+      }
+    }
+   
+    var errThrown = false;
+    try {
+      assertThrows(()=>{}, Error);
+    } catch (e) {
+      errThrown = true;
+      if (!(e instanceof NothingThrownError)){
+        throw new Error("assertThrows should throw NothingThrownError no error was thrown.");
+      }
+    }
+    if (!errThrown){
+      throw new Error("assertThrows should throw NothingThrownError no error was thrown.");
+    }
+  }
+    
+    
   class PlayerPosError extends Error {}
   class Player {
     constructor(down, right){
@@ -100,18 +148,7 @@
         throw new Error(`${detailMsg}: Expected ${result} to be ${expected}`);
       }
     };
-    class NotCalledError{}
-    const assertThrows = (func, errorClass, message) => {
-      try {
-            func();
-            throw new NotCalledError();
-          } catch (e) {
-            if (e instanceof NotCalledError) throw new Error(": Exception not thrown.");
-            if (!(e instanceof errorClass)){
-              throw new Error(`: Expected error of class ${errorClass.name}`);
-            };
-          }
-    };
+
     tests = [
       ["generating player tile",
         [
@@ -229,6 +266,7 @@
   document.getElementById("l_button").onclick = (event) => {
     engine.progress(Command.MoveRight)
   };
+}
   
   
 </script>
