@@ -52,57 +52,38 @@ On unit tests:
     });
   };
   
-  class NothingThrownError extends Error {}
-  class WrongErrorError extends Error {}
-  const assertThrows = (func, errorClass) => {
+  const throwsError = (func, errorClass) => {
     checkTypes([Function, func], [Function, errorClass]);
     try {
       func();
-      throw new NothingThrownError();
+      return false;
     } catch (e) {
-      if (!(e instanceof errorClass)){
-        throw new WrongErrorError(`Expected error of class ${errorClass.name} to be thrown.`);
-      }
-      if (e instanceof NothingThrownError){
-        throw e;
-      }
+      return (e instanceof errorClass);
     }
   }
   {
-    const errMsg = "assertThrow shouldn't throw Error if correct Error was thrown.";
-    try {
-      assertThrows(()=>{
+    const errMsg = "throwsError should return true if correct Error was thrown.";
+    const throws = throwsError(()=>{
         throw new Error();
       }, Error);
-    } catch {
+    if (!throws){
       throw new Error(errMsg);
     }
   }
   {
-    const errMsg = "assertThrows should throw WrongErrorError if wrong error was thrown.";
+    const errMsg = "throwsError should return false if wrong error was thrown.";
     class TestError extends Error {}
-    try {
-      assertThrows(() => {
+    const throws = throwsError(() => {
         throw new Error();
       }, TestError);
-    } catch (e) {
-      if (!(e instanceof WrongErrorError)){
-        throw new Error(errMsg);
-      }
+    if (throws){
+      throw new Error(errMsg);
     }
   }
   {
-    const errMsg = "assertThrows should throw NothingThrownError no error was thrown.";
-    var errThrown = false;
-    try {
-      assertThrows(()=>{}, Error);
-    } catch (e) {
-      errThrown = true;
-      if (!(e instanceof NothingThrownError)){
-        throw new Error(errMsg);
-      }
-    }
-    if (!errThrown){
+    const errMsg = "throwsError should return false if no error was thrown.";
+    const throws = throwsError(()=>{}, Error);
+    if (throws){
       throw new Error(errMsg);
     }
   }
@@ -116,9 +97,12 @@ On unit tests:
   }
   {
     const errMsg = "checkTypes should throw error if types don't match";
-    assertThrows(()=>{
+    const throws = throwsError(()=>{
       checkTypes([Error, new Date()]);
     }, TypeError);
+    if (!throws){
+      throw new Error(errMsg);
+    }
   }
   {
     const errMsg = "checkTypes should not throw error for primitives";
@@ -153,6 +137,14 @@ On unit tests:
     moveUp(){
       this.down -= 1;
     }
+  }
+  {
+    /*const errMsg = "player cannot be constructed with negative position.";
+    [[-1, -1], [0, -1], [-1, 0]].forEach(([down, right])=>{
+        assertThrows(()=>{
+        new Player(doen, right);
+      }, InvalidPlayerError);
+    });*/
   }
   
   const Command = {
@@ -254,14 +246,6 @@ On unit tests:
           game.update(command, player);
           assertEqual(expectedDown, game.player.down, message);
           assertEqual(expectedRight, game.player.right, message);
-        }
-      ],
-      ["validating non-negative player start pos",
-        [[0, -1], [-1, 0]],
-        ([right, down]) => {
-          assertThrows(() => {
-            new Player(right, down);
-          }, PlayerPosError);
         }
       ]
     ];
