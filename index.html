@@ -43,6 +43,7 @@
   class NothingThrownError extends Error {}
   class WrongErrorError extends Error {}
   const assertThrows = (func, errorClass) => {
+    checkTypes([Function, func], [Function, errorClass]);
     try {
       func();
       throw new NothingThrownError();
