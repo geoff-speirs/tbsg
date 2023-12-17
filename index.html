@@ -22,6 +22,15 @@
 
 <script>
 {
+/*
+This whole project is in one file for the following reasons:
+- Making dev environments as close as possible to production. As a single file you are developing on exactly the same environment that gets loaded in prod.
+- Needing less tooling. Most browsers don't let you load other files uness it is in a hosted environment. By using a single file we can load and test the project by opening the single file in any browser.
+- Simplicity. By keeping all code in one file we minimise any knowledge required outside of html, css and JavaScript.
+
+Security concerns for having local scripts:
+- Local scripts can be flagged as a security risk, however given that this project does not load any external resources I beleive the risk does not exist. If you fork this project and plan to make changes then please take this into consideration.
+*/
   class TypeError extends Error {}
   const checkTypes = (...varPairs) => {
     varPairs.forEach(([type, variable]) => {
