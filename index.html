@@ -30,6 +30,9 @@ This whole project is in one file for the following reasons:
 
 Security concerns for having local scripts:
 - Local scripts can be flagged as a security risk, however given that this project does not load any external resources I beleive the risk does not exist. If you fork this project and plan to make changes then please take this into consideration.
+
+On unit tests:
+- All unit tests for game logic should be triggered by issuing commands to the game. eg moving the player only should be tested via the Game class, not in the Player class. This is because we consider the Game to be the unit of logic we are promising everyone will work. The only unit tests we should write for other classes that comprise the game are for their constructors, as game objects can be ibstantiated outside of the game.
 */
   class TypeError extends Error {}
   const checkTypes = (...varPairs) => {
