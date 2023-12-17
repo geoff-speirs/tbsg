@@ -22,16 +22,33 @@
 
 <script>
 {
-  const checkTypes = () => {};
+  class TypeError extends Error {}
+  const checkTypes = (...varPairs) => {
+    varPairs.forEach(([type, variable]) => {
+      if (variable instanceof type) {
+        return;
+      } else if (typeof(variable) === "object"){
+        throw new TypeError(`Expected ${variable} to be of type ${type}`);
+      }
+      if (type === String && typeof(variable) === "string") return;
+      if (type === Boolean && typeof(variable) === "boolean") return;
+      if (type === Number && typeof(variable) === "number") return;
+      if (type === BigInt && typeof(variable) === "bigint") return;
+      if (type === Symbol && typeof(variable) === "symbol") return;
+      if (type === Function && typeof(variable) === "function") return;
+      throw new TypeError(`Expected ${variable} to be of type ${type}`)
+    });
+  };
+  
   class NothingThrownError extends Error {}
   class WrongErrorError extends Error {}
-  const assertThrows = (func, errorClass, message = "") => {
+  const assertThrows = (func, errorClass) => {
     try {
       func();
       throw new NothingThrownError();
     } catch (e) {
       if (!(e instanceof errorClass)){
-        throw new WrongErrorError(`Expected error of class ${errorClass.name} to he thrown.`);
+        throw new WrongErrorError(`Expected error of class ${errorClass.name} to be thrown.`);
       }
       if (e instanceof NothingThrownError){
         throw e;
@@ -39,10 +56,17 @@
     }
   }
   {
-    assertThrows(()=>{
-      throw new Error();
-    }, Error);
-    
+    const errMsg = "assertThrow shouldn't throw Error if correct Error was thrown.";
+    try {
+      assertThrows(()=>{
+        throw new Error();
+      }, Error);
+    } catch {
+      throw new Error(errMsg);
+    }
+  }
+  {
+    const errMsg = "assertThrows should throw WrongErrorError if wrong error was thrown.";
     class TestError extends Error {}
     try {
       assertThrows(() => {
@@ -50,24 +74,50 @@
       }, TestError);
     } catch (e) {
       if (!(e instanceof WrongErrorError)){
-        throw new Error("assertThrows should throw WrongErrorError if wrong error was thrown.");
+        throw new Error(errMsg);
       }
     }
-   
+  }
+  {
+    const errMsg = "assertThrows should throw NothingThrownError no error was thrown.";
     var errThrown = false;
     try {
       assertThrows(()=>{}, Error);
     } catch (e) {
       errThrown = true;
       if (!(e instanceof NothingThrownError)){
-        throw new Error("assertThrows should throw NothingThrownError no error was thrown.");
+        throw new Error(errMsg);
       }
     }
     if (!errThrown){
-      throw new Error("assertThrows should throw NothingThrownError no error was thrown.");
+      throw new Error(errMsg);
     }
   }
-    
+  {
+    const errMsg = "checkTypes should not throw error if type matches.";
+    try {
+      checkTypes([Error, new Error()]);
+    } catch (e) {
+      throw new Error(errMsg);
+    }
+  }
+  {
+    const errMsg = "checkTypes should throw error if types don't match";
+    assertThrows(()=>{
+      checkTypes([Error, new Date()]);
+    }, TypeError);
+  }
+  {
+    const errMsg = "checkTypes should not throw error for primitives";
+    [[String, "test"], [Number, 123], [Boolean , false], [BigInt, 1n], [Symbol, Symbol()], [Function, () => {}]].forEach((varPair) => {
+      try {
+        checkTypes(varPair);
+      } catch (e) {
+        throw new Error(errMsg);
+      }
+    });
+  }
+  
     
   class PlayerPosError extends Error {}
   class Player {
