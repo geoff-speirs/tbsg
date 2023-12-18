@@ -90,6 +90,7 @@ On unit tests:
       }
     }
   }
+  
   const throwsError = (func, errorClass) => {
     checkTypes([Function, func], [Function, errorClass]);
     try {
@@ -104,9 +105,7 @@ On unit tests:
     const throws = throwsError(()=>{
         throw new Error();
       }, Error);
-    if (!throws){
-      throw new Error(errMsg);
-    }
+    assert(throws, errMsg);
   }
   {
     const errMsg = "throwsError should return false if wrong error was thrown.";
@@ -114,16 +113,12 @@ On unit tests:
     const throws = throwsError(() => {
         throw new Error();
       }, TestError);
-    if (throws){
-      throw new Error(errMsg);
-    }
+    assert(!throws, errMsg);
   }
   {
     const errMsg = "throwsError should return false if no error was thrown.";
     const throws = throwsError(()=>{}, Error);
-    if (throws){
-      throw new Error(errMsg);
-    }
+    assert (!throws, errMsg);
   }
   {
     const errMsg = "checkTypes should not throw error if type matches.";
@@ -138,9 +133,7 @@ On unit tests:
     const throws = throwsError(()=>{
       checkTypes([Error, new Date()]);
     }, TypeError);
-    if (!throws){
-      throw new Error(errMsg);
-    }
+    assert(throws, errMsg);
   }
   {
     const errMsg = "checkTypes should not throw error for primitives";
