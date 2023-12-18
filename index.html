@@ -51,7 +51,45 @@ On unit tests:
       throw new TypeError(`Expected ${variable} to be of type ${type}`)
     });
   };
-  
+
+  const assert = (fact, message = "Assertion failed.") => {
+    checkTypes([Boolean, fact], [String, message]);
+    if (!fact){
+      throw new Error(message);
+    }
+  }
+  {
+    const errMsg = "assert should throw error if fact is false";
+    class TestAssertError extends Error {}
+    try {
+      assert(false);
+      throw new TestAssertError(errMsg);
+    } catch (e) {
+      if (e instanceof TestAssertError){
+        throw new Error(errMsg);
+      }
+    }
+  }
+  {
+    const errMsg = "assert should not throw error if fact is true";
+    try {
+      assert(true);
+    } catch (e) {
+      throw new Error(errMsg);
+    }
+  }
+  {
+    const errMsg = "assert should throw error with specified error message";
+    const testMsg = "test error message";
+    try {
+      assert(false, testMsg);
+    } catch (e) {
+      const msgCorrect = e.message === testMsg;
+      if (!msgCorrect){
+        throw new Error(errMsg);
+      }
+    }
+  }
   const throwsError = (func, errorClass) => {
     checkTypes([Function, func], [Function, errorClass]);
     try {
@@ -114,7 +152,6 @@ On unit tests:
       }
     });
   }
-  
     
   class PlayerPosError extends Error {}
   class Player {
