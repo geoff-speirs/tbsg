@@ -146,11 +146,11 @@ On unit tests:
     });
   }
     
-  class PlayerPosError extends Error {}
+  class PlayerValidationError extends Error {}
   class Player {
     constructor(down, right){
       if (down < 0 || right < 0) {
-        throw new PlayerPosError();
+        throw new PlayerValidationError("Player must have positive position.");
       }
       this.down = down;
       this.right = right;
@@ -169,12 +169,13 @@ On unit tests:
     }
   }
   {
-    /*const errMsg = "player cannot be constructed with negative position.";
+    const errMsg = "player cannot be constructed with negative position.";
     [[-1, -1], [0, -1], [-1, 0]].forEach(([down, right])=>{
-        assertThrows(()=>{
-        new Player(doen, right);
-      }, InvalidPlayerError);
-    });*/
+      const throws = throwsError(()=>{
+        new Player(down, right);
+      }, PlayerValidationError);
+      assert(throws, errMsg);
+    });
   }
   
   const Command = {
