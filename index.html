@@ -129,6 +129,9 @@ On unit tests:
     }
     reduceHunger(){
       this.hunger -= 1;
+      if (this.hunger < 0){
+        this.hunger = 0;
+      }
     }
   }
   
@@ -226,7 +229,11 @@ On unit tests:
     });
   }
   {
-    const errMsg = "failed move should not reduce hunger";
+    const errMsg = "hunger should not reduce to below 0";
+    const player = new Player(0, 0, 100, 0);
+    const game = new Game([[0, 0]], player);
+    game.update(Command.MoveRight);
+    assert(0 === game.player.hunger, errMsg);
   }
   
   const Display = {
