@@ -189,16 +189,45 @@ On unit tests:
       this.map = map;
       this.player = player;
     }
+    
+    movePlayerRight(){
+      if(this.player.right + 1 >= this.map[this.player.down].length){
+        return;
+      }
+      this.player.moveRight();
+    }
+    
+    movePlayerLeft(){
+      if(this.player.right - 1 < 0){
+        return;
+      }
+      this.player.moveLeft();
+    }
+    
+    movePlayerDown(){
+      if(this.player.down + 1 >= this.map.length){
+        return;
+      }
+      this.player.moveDown();
+    }
+    
+    movePlayerUp() {
+      if (this.player.down - 1 < 0) {
+        return;
+      }
+      this.player.moveUp();
+    }
+    
     update(command){
       checkTypes([Symbol, command]);
       if (command === Command.MoveRight){
-        this.player.moveRight();
+        this.movePlayerRight();
       } else if (command === Command.MoveLeft){
-        this.player.moveLeft();
+        this.movePlayerLeft();
       } else if (command === Command.MoveDown){
-        this.player.moveDown();
+        this.movePlayerDown();
       } else if (command === Command.MoveUp) {
-        this.player.moveUp();
+        this.movePlayerUp();
       }
     }
   }
@@ -212,10 +241,26 @@ On unit tests:
     ].forEach(([[expectedDown, expectedRight], [startX, startY], command, direction]) => {
       const player = new Player(startX, startY);
       const game = new Game([[1,2],[3,4]], player);
-      game.update(command, player);
+      game.update(command);
       assert(expectedDown === game.player.down, `${errMsg} ${direction}`);
       assert(expectedRight === game.player.right, `${errMsg} ${direction}`);
     });
+  }
+  {
+    const errMsg = "Player shouldn't move outside of map when moving";
+    [
+      [Command.MoveRight, "right"],
+      [Command.MoveLeft, "left"],
+      [Command.MoveDown, "down"],
+      [Command.MoveUp, "up"]
+    ].forEach(([command, direction]) => {
+      const player = new Player(0, 0);
+      const game = new Game([[0]], player);
+      game.update(command);
+      assert(0 === game.player.right, `${errMsg} ${direction}`);
+      assert(0 === game.player.down, `${errMsg} ${direction}`);
+    });
+    
   }
   
   const Display = {
