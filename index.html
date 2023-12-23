@@ -204,6 +204,23 @@ On unit tests:
       }
     }
   }
+  {
+    const errMsg = "Move command should move player";
+      [
+        [[0, 1], [0, 0], Command.MoveRight, "right"],
+        [[0, 0], [0, 1], Command.MoveLeft, "left"],
+        [[1, 0], [0, 0], Command.MoveDown, "down"],
+        [[0, 0], [1, 0], Command.MoveUp, "up"]
+      ].forEach(([[expectedDown, expectedRight], [startX, startY], command, direction]) => {
+          const player = new Player(startX, startY);
+          const game = new Game([[1,2],[3,4]], player);
+          game.update(command, player);
+          assert(expectedDown === game.player.down, `${errMsg} ${direction}`);
+          assert(expectedRight === game.player.right, `${errMsg} ${direction}`);
+        });
+  }
+  
+  
   
   const Display = {
     GroundTile: Symbol("GroundTile"),
@@ -268,21 +285,7 @@ On unit tests:
           assertEqual(expected, result);
         }
       ],
-      ["moving player",
-        [
-          [[0, 1], [0, 0], Command.MoveRight, "right"],
-          [[0, 0], [0, 1], Command.MoveLeft, "left"],
-          [[1, 0], [0, 0], Command.MoveDown, "down"],
-          [[0, 0], [1, 0], Command.MoveUp, "up"]
-        ],
-        ([[expectedDown, expectedRight], [startX, startY], command, message]) => {
-          const player = new Player(startX, startY);
-          const game = new Game([[1,2],[3,4]], player);
-          game.update(command, player);
-          assertEqual(expectedDown, game.player.down, message);
-          assertEqual(expectedRight, game.player.right, message);
-        }
-      ]
+      
     ];
   
     var failures = [];
