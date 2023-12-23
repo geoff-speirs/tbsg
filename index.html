@@ -113,24 +113,27 @@ On unit tests:
     }
     moveRight(){
       this.right += 1;
-      this.reduceHunger();
+      this.applyHunger();
     }
     moveLeft(){
       this.right -= 1;
-      this.reduceHunger();
+      this.applyHunger();
     }
     moveDown(){
       this.down += 1;
-      this.reduceHunger();
+      this.applyHunger();
     }
     moveUp(){
       this.down -= 1;
-      this.reduceHunger();
+      this.applyHunger();
     }
-    reduceHunger(){
+    applyHunger(){
       this.hunger -= 1;
       if (this.hunger < 0){
         this.hunger = 0;
+      }
+      if (this.hunger === 0){
+        this.hp -= 1;
       }
     }
   }
@@ -229,11 +232,31 @@ On unit tests:
     });
   }
   {
+    const errMsg = "hunger should not reduce for failed move"
+    const player = new Player(0, 0, 100, 100);
+    const game = new Game([[0]], player);
+    game.update(Command.MoveRight);
+    assert(100 === game.player.hunger, errMsg);
+  }
+  {
     const errMsg = "hunger should not reduce to below 0";
     const player = new Player(0, 0, 100, 0);
     const game = new Game([[0, 0]], player);
     game.update(Command.MoveRight);
     assert(0 === game.player.hunger, errMsg);
+  }
+  {
+    const errMsg = "hp should reduce by 1 when hunger is 0"
+    const player = new Player(0, 0, 100, 0);
+    const game = new Game([[0, 0]], player);
+    game.update(Command.MoveRight);
+    assert(99 === game.player.hp, errMsg);
+  }
+  {
+    const errMsg = "hp should not reduce to below 0"
+  }
+  {
+    const errMsg = "hp should not reduce when hunger is not 0"
   }
   
   const Display = {
@@ -295,12 +318,12 @@ On unit tests:
     render(){
       const tiles = generateTiles(game);
       mapElem.textContent = render(tiles);
-      hpElem.textContent = game.player.maxHp;
+      hpElem.textContent = `${game.player.hp}/${game.player.maxHp}`;
       hungerElem.textContent = `${game.player.hunger}/${game.player.maxHunger}`;
     }
   }
   
-  const player = new Player(0, 0, 100, 100);
+  const player = new Player(0, 0, 10, 10);
   const game = new Game([[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0]], player);
   const engine = new Engine(game);
   engine.render();
