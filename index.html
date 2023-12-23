@@ -18,6 +18,7 @@
   <button type="button" id="l_button">L</button>
 </p>
 <p style="font-family:monospace;">HP: <span id="hp"></span></p>
+<p style="font-family:monospace;">Hunger: <span id="hunger"></span></p>
 
 <script>
 {
@@ -147,16 +148,20 @@ On unit tests:
     
   class PlayerValidationError extends Error {}
   class Player {
-    constructor(down, right, maxHp){
+    constructor(down = 0, right = 0, maxHp = 100, maxHunger = 100){
       if (down < 0 || right < 0) {
         throw new PlayerValidationError("Player must have non-negative position.");
       }
       if (maxHp <= 0){
         throw new PlayerValidationError("Player maxhp must be positive")
       }
+      if (maxHunger <= 0){
+        throw new PlayerValidationError("Player maxHunger must be positive")
+      }
       this.down = down;
       this.right = right;
       this.maxHp = maxHp;
+      this.maxHunger = maxHunger;
     }
     moveRight(){
       this.right += 1;
@@ -182,8 +187,14 @@ On unit tests:
   }
   {
     const errMsg = "player cannot be constructed with 0 or lower maxhp";
-    const throws = throwsError(()=> {new Player (0, 0, 0);}, PlayerValidationError);
+    const throws = throwsError(()=> {new Player (0, 0, 0, 100);}, PlayerValidationError);
     assert(throws, errMsg);
+  }
+  {
+    const errMsg = "player cannot be constructed with 0 or lower maxHunger";
+    const throws = throwsError(()=> {new Player (0, 0, 100, 0);}, PlayerValidationError);
+    assert(throws, errMsg);
+  
   }
   
   const Command = {
@@ -326,30 +337,32 @@ On unit tests:
   
   const mapElem = document.getElementById("map");
   const hpElem = document.getElementById("hp");
+  const hungerElem = document.getElementById("hunger");
   class Engine {
     constructor(game){
       this.game = game;
-      const tiles = generateTiles(game);
-      mapElem.textContent = render(tiles);//render initial
-      hpElem.textContent = game.player.maxHp;
     }
     
     progress(command){
       game.update(command);
+      this.render();
+    }
+    
+    render(){
       const tiles = generateTiles(game);
       mapElem.textContent = render(tiles);
       hpElem.textContent = game.player.maxHp;
+      hungerElem.textContent = game.player.maxHunger;
     }
   }
   
   //types pass tests, make checkTypes noop
   checkTypes = ()=>{};
   
-  const player = new Player(0, 0, 100);
+  const player = new Player(0, 0, 100, 100);
   const game = new Game([[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0]], player);
   const engine = new Engine(game);
-  const tiles = generateTiles(game);
-  mapElem.textContent = render(tiles);
+  engine.render();
   
   document.addEventListener("keydown", (event) => {
     switch (event.code) {
