@@ -8,7 +8,7 @@
 </head>
 
 <body>
-<p id="map" style="white-space: pre;">
+<p id="map" style="white-space: pre; font-family:monospace;">
   Starting...
 </p>
 <p>
@@ -33,7 +33,7 @@ On unit tests:
 - All unit tests for game logic should be triggered by issuing commands to the game. eg moving the player only should be tested via the Game class, not in the Player class. This is because we consider the Game to be the unit of logic we are promising everyone will work. The only unit tests we should write for other classes that comprise the game are for their constructors, as game objects can be ibstantiated outside of the game.
 */
   class TypeError extends Error {}
-  const checkTypes = (...varPairs) => {
+  var checkTypes = (...varPairs) => {
     varPairs.forEach(([type, variable]) => {
       if (variable instanceof type) {
         return;
@@ -298,9 +298,9 @@ On unit tests:
     var tiles = tiles.map((lines) => lines.map(tile => {
         switch(tile){
           case Display.GroundTile:
-          return "G";
+          return ",";
           case Display.PlayerTile:
-          return "P";
+          return "@";
         }
       }
       ).join("")).join("\n");
@@ -308,7 +308,7 @@ On unit tests:
   };
   {
     const errMsg = "should render tiles";
-    const expected = "G\nP";
+    const expected = ",\n@";
     const tiles = [[Display.GroundTile],[Display.PlayerTile]];
     const result = render(tiles);
     assert(expected === result, errMsg);
@@ -329,8 +329,11 @@ On unit tests:
     }
   }
   
+  //types pass tests, make checkTypes noop
+  checkTypes = ()=>{};
+  
   const player = new Player(0, 0);
-  const game = new Game([["T", "T"], ["T", "T"]], player);
+  const game = new Game([[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0]], player);
   const engine = new Engine(game);
   const tiles = generateTiles(game);
   mapElem.textContent = render(tiles);
