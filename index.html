@@ -34,26 +34,7 @@ Security concerns for having local scripts:
 On unit tests:
 - All unit tests for game logic should be triggered by issuing commands to the game. eg moving the player only should be tested via the Game class, not in the Player class. This is because we consider the Game to be the unit of logic we are promising everyone will work. The only unit tests we should write for other classes that comprise the game are for their constructors, as game objects can be ibstantiated outside of the game.
 */
-  class TypeError extends Error {}
-  var checkTypes = (...varPairs) => {
-    varPairs.forEach(([type, variable]) => {
-      if (variable instanceof type) {
-        return;
-      } else if (typeof(variable) === "object"){
-        throw new TypeError(`Expected ${variable} to be of type ${type}`);
-      }
-      if (type === String && typeof(variable) === "string") return;
-      if (type === Boolean && typeof(variable) === "boolean") return;
-      if (type === Number && typeof(variable) === "number") return;
-      if (type === BigInt && typeof(variable) === "bigint") return;
-      if (type === Symbol && typeof(variable) === "symbol") return;
-      if (type === Function && typeof(variable) === "function") return;
-      throw new TypeError(`Expected ${variable} to be of type ${type}`)
-    });
-  };
-
   const assert = (fact, message = "Assertion failed.") => {
-    checkTypes([Boolean, fact], [String, message]);
     if (!fact){
       throw new Error(message);
     }
@@ -92,7 +73,6 @@ On unit tests:
   }
   
   const throwsError = (func, errorClass) => {
-    checkTypes([Function, func], [Function, errorClass]);
     try {
       func();
       return false;
@@ -120,44 +100,10 @@ On unit tests:
     const throws = throwsError(()=>{}, Error);
     assert (!throws, errMsg);
   }
-  {
-    const errMsg = "checkTypes should not throw error if type matches.";
-    try {
-      checkTypes([Error, new Error()]);
-    } catch (e) {
-      throw new Error(errMsg);
-    }
-  }
-  {
-    const errMsg = "checkTypes should throw error if types don't match";
-    const throws = throwsError(()=>{
-      checkTypes([Error, new Date()]);
-    }, TypeError);
-    assert(throws, errMsg);
-  }
-  {
-    const errMsg = "checkTypes should not throw error for primitives";
-    [[String, "test"], [Number, 123], [Boolean , false], [BigInt, 1n], [Symbol, Symbol()], [Function, () => {}]].forEach((varPair) => {
-      try {
-        checkTypes(varPair);
-      } catch (e) {
-        throw new Error(errMsg);
-      }
-    });
-  }
     
   class PlayerValidationError extends Error {}
   class Player {
     constructor(down = 0, right = 0, maxHp = 100, maxHunger = 100){
-      if (down < 0 || right < 0) {
-        throw new PlayerValidationError("Player must have non-negative position.");
-      }
-      if (maxHp <= 0){
-        throw new PlayerValidationError("Player maxhp must be positive")
-      }
-      if (maxHunger <= 0){
-        throw new PlayerValidationError("Player maxHunger must be positive")
-      }
       this.down = down;
       this.right = right;
       this.maxHp = maxHp;
@@ -176,26 +122,6 @@ On unit tests:
       this.down -= 1;
     }
   }
-  {
-    const errMsg = "player cannot be constructed with negative position.";
-    [[-1, -1], [0, -1], [-1, 0]].forEach(([down, right])=>{
-      const throws = throwsError(()=>{
-        new Player(down, right);
-      }, PlayerValidationError);
-      assert(throws, errMsg);
-    });
-  }
-  {
-    const errMsg = "player cannot be constructed with 0 or lower maxhp";
-    const throws = throwsError(()=> {new Player (0, 0, 0, 100);}, PlayerValidationError);
-    assert(throws, errMsg);
-  }
-  {
-    const errMsg = "player cannot be constructed with 0 or lower maxHunger";
-    const throws = throwsError(()=> {new Player (0, 0, 100, 0);}, PlayerValidationError);
-    assert(throws, errMsg);
-  
-  }
   
   const Command = {
     MoveRight: Symbol("MoveRight"),
@@ -206,7 +132,6 @@ On unit tests:
   
   class Game {
     constructor(map, player){
-      checkTypes([Array, map], [Player, player]);
       this.map = map;
       this.player = player;
     }
@@ -240,7 +165,6 @@ On unit tests:
     }
     
     update(command){
-      checkTypes([Symbol, command]);
       if (command === Command.MoveRight){
         this.movePlayerRight();
       } else if (command === Command.MoveLeft){
@@ -290,7 +214,6 @@ On unit tests:
   }
   
   const generateTiles = (game) => {
-    checkTypes([Game, game]);
     var tiles = game.map.map((lines) => lines.map(tile => Display.GroundTile));
     tiles[game.player.down][game.player.right] = Display.PlayerTile;
     return tiles;
@@ -315,7 +238,6 @@ On unit tests:
   }
   
   const render = (tiles) => {
-    checkTypes([Array, tiles])
     var tiles = tiles.map((lines) => lines.map(tile => {
         switch(tile){
           case Display.GroundTile:
@@ -355,9 +277,6 @@ On unit tests:
       hungerElem.textContent = game.player.maxHunger;
     }
   }
-  
-  //types pass tests, make checkTypes noop
-  checkTypes = ()=>{};
   
   const player = new Player(0, 0, 100, 100);
   const game = new Game([[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0]], player);
