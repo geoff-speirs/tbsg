@@ -253,10 +253,14 @@ On unit tests:
     assert(99 === game.player.hp, errMsg);
   }
   {
-    const errMsg = "hp should not reduce to below 0"
+    const errMsg = "hp should not reduce when hunger is not 0"
+    const player = new Player(0, 0, 100, 100);
+    const game = new Game([[0, 0]], player);
+    game.update(Command.MoveRight);
+    assert(100 === game.player.hp, errMsg);
   }
   {
-    const errMsg = "hp should not reduce when hunger is not 0"
+    const errMsg = "game should finish if hp is 0"
   }
   
   const Display = {
