@@ -179,18 +179,20 @@ On unit tests:
   }
   
   const Command = {
-    MoveRight: "MoveRight",
-    MoveLeft: "MoveLeft",
-    MoveDown: "MoveDown",
-    MoveUp: "MoveUp"
+    MoveRight: Symbol("MoveRight"),
+    MoveLeft: Symbol("MoveLeft"),
+    MoveDown: Symbol("MoveDown"),
+    MoveUp: Symbol("MoveUp")
   }
   
   class Game {
     constructor(map, player){
+      checkTypes([Array, map], [Player, player]);
       this.map = map;
       this.player = player;
     }
     update(command){
+      checkTypes([Symbol, command]);
       if (command === Command.MoveRight){
         this.player.moveRight();
       } else if (command === Command.MoveLeft){
@@ -204,17 +206,19 @@ On unit tests:
   }
   
   const Display = {
-    GroundTile: "GroundTile",
-    PlayerTile: "PlayerTile"
+    GroundTile: Symbol("GroundTile"),
+    PlayerTile: Symbol("PlayerTile")
   }
   
   const generateTiles = (game) => {
+    checkTypes([Game, game]);
     var tiles = game.map.map((lines) => lines.map(tile => Display.GroundTile));
     tiles[game.player.down][game.player.right] = Display.PlayerTile;
     return tiles;
   };
   
   const render = (tiles) => {
+    checkTypes([Array, tiles])
     var tiles = tiles.map((lines) => lines.map(tile => {
         switch(tile){
           case Display.GroundTile:
