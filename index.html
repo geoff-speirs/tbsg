@@ -8,8 +8,6 @@
 </head>
 
 <body>
-<p id="test_failures" style="white-space: pre;">
-</p>
 <p id="map" style="white-space: pre;">
   Starting...
 </p>
@@ -206,21 +204,19 @@ On unit tests:
   }
   {
     const errMsg = "Move command should move player";
-      [
-        [[0, 1], [0, 0], Command.MoveRight, "right"],
-        [[0, 0], [0, 1], Command.MoveLeft, "left"],
-        [[1, 0], [0, 0], Command.MoveDown, "down"],
-        [[0, 0], [1, 0], Command.MoveUp, "up"]
-      ].forEach(([[expectedDown, expectedRight], [startX, startY], command, direction]) => {
-          const player = new Player(startX, startY);
-          const game = new Game([[1,2],[3,4]], player);
-          game.update(command, player);
-          assert(expectedDown === game.player.down, `${errMsg} ${direction}`);
-          assert(expectedRight === game.player.right, `${errMsg} ${direction}`);
-        });
+    [
+      [[0, 1], [0, 0], Command.MoveRight, "right"],
+      [[0, 0], [0, 1], Command.MoveLeft, "left"],
+      [[1, 0], [0, 0], Command.MoveDown, "down"],
+      [[0, 0], [1, 0], Command.MoveUp, "up"]
+    ].forEach(([[expectedDown, expectedRight], [startX, startY], command, direction]) => {
+      const player = new Player(startX, startY);
+      const game = new Game([[1,2],[3,4]], player);
+      game.update(command, player);
+      assert(expectedDown === game.player.down, `${errMsg} ${direction}`);
+      assert(expectedRight === game.player.right, `${errMsg} ${direction}`);
+    });
   }
-  
-  
   
   const Display = {
     GroundTile: Symbol("GroundTile"),
@@ -233,6 +229,24 @@ On unit tests:
     tiles[game.player.down][game.player.right] = Display.PlayerTile;
     return tiles;
   };
+  {
+    const errMsg = "should generate ground tiles";
+    [
+      [0, 0], [1, 1]
+    ].forEach(([down, right]) => {
+      const result = generateTiles(new Game([[0, 1], [2, 3]], new Player(0, 1)));
+      assert(Display.GroundTile === result[down][right], errMsg);
+    });
+  }
+  {
+    const errMsg = "should generate player tile";
+    [
+      [0,0], [1,1]
+    ].forEach(([down, right]) => {
+      const result = generateTiles(new Game([[1,2],[3,4]], new Player(down, right)));
+      assert(Display.PlayerTile === result[down][right], errMsg);
+    });
+  }
   
   const render = (tiles) => {
     checkTypes([Array, tiles])
@@ -247,58 +261,12 @@ On unit tests:
       ).join("")).join("\n");
     return tiles;
   };
-  
   {
-    const assertEqual = (expected, result, message) => {
-      if (expected !== result){
-        const detailMsg = message ?? "";
-        throw new Error(`${detailMsg}: Expected ${result} to be ${expected}`);
-      }
-    };
-
-    tests = [
-      ["generating player tile",
-        [
-          [0,0], [1,1]
-        ],
-        ([down, right]) => {
-          const result = generateTiles(new Game([[1,2],[3,4]], new Player(down, right)));
-          assertEqual(Display.PlayerTile, result[down][right]);
-        }
-      ],
-      ["generating ground tiles",
-        [
-          [0,0], [1,1]
-        ],
-        ([down, right]) => {
-          const result = generateTiles(new Game([[0,1], [2,3]], new Player(0, 1)));
-          assertEqual(Display.GroundTile, result[down][right]);
-        }
-      ],
-      ["rendering tiles",
-        [
-          ["G\nP", [[Display.GroundTile],[Display.PlayerTile]]
-          ]
-        ],
-        ([expected, tiles]) => {
-          const result = render(tiles);
-          assertEqual(expected, result);
-        }
-      ],
-      
-    ];
-  
-    var failures = [];
-    tests.forEach(([description, dataList, test]) => dataList.forEach((data) => {
-        try{
-          test(data);
-        }
-        catch (error) {
-          failures.push(`Error ${description} ${error.message}`);
-        }
-      })
-    );
-    document.getElementById("test_failures").textContent = failures.join("\n");
+    const errMsg = "should render tiles";
+    const expected = "G\nP";
+    const tiles = [[Display.GroundTile],[Display.PlayerTile]];
+    const result = render(tiles);
+    assert(expected === result, errMsg);
   }
   
   const mapElem = document.getElementById("map");
