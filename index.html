@@ -107,19 +107,28 @@ On unit tests:
       this.down = down;
       this.right = right;
       this.maxHp = maxHp;
+      this.hp = maxHp;
       this.maxHunger = maxHunger;
+      this.hunger = maxHunger;
     }
     moveRight(){
       this.right += 1;
+      this.reduceHunger();
     }
     moveLeft(){
       this.right -= 1;
+      this.reduceHunger();
     }
     moveDown(){
       this.down += 1;
+      this.reduceHunger();
     }
     moveUp(){
       this.down -= 1;
+      this.reduceHunger();
+    }
+    reduceHunger(){
+      this.hunger -= 1;
     }
   }
   
@@ -205,7 +214,19 @@ On unit tests:
       assert(0 === game.player.right, `${errMsg} ${direction}`);
       assert(0 === game.player.down, `${errMsg} ${direction}`);
     });
+  }
+  {
+    const errMsg = "moving should reduce hunger";
     
+    [Command.MoveRight, Command.MoveLeft, Command.MoveDown, Command.MoveUp].forEach(()=>{
+      const player = new Player(1, 1, 100, 100);
+      const game = new Game([[0, 0, 0], [0, 0, 0], [0, 0, 0]], player);
+      game.update(Command.MoveRight);
+      assert(99 === game.player.hunger, errMsg);
+    });
+  }
+  {
+    const errMsg = "failed move should not reduce hunger";
   }
   
   const Display = {
@@ -237,6 +258,7 @@ On unit tests:
     });
   }
   
+  //Below here is I/O code that won't be tested
   const render = (tiles) => {
     var tiles = tiles.map((lines) => lines.map(tile => {
         switch(tile){
@@ -249,13 +271,6 @@ On unit tests:
       ).join("")).join("\n");
     return tiles;
   };
-  {
-    const errMsg = "should render tiles";
-    const expected = ",\n@";
-    const tiles = [[Display.GroundTile],[Display.PlayerTile]];
-    const result = render(tiles);
-    assert(expected === result, errMsg);
-  }
   
   const mapElem = document.getElementById("map");
   const hpElem = document.getElementById("hp");
@@ -274,7 +289,7 @@ On unit tests:
       const tiles = generateTiles(game);
       mapElem.textContent = render(tiles);
       hpElem.textContent = game.player.maxHp;
-      hungerElem.textContent = game.player.maxHunger;
+      hungerElem.textContent = `${game.player.hunger}/${game.player.maxHunger}`;
     }
   }
   
