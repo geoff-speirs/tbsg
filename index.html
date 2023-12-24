@@ -103,13 +103,14 @@ On unit tests:
     
   class PlayerValidationError extends Error {}
   class Player {
-    constructor(down = 0, right = 0, maxHp = 100, maxHunger = 100){
+    constructor(down = 0, right = 0, maxHp = 100, maxHunger = 100, inventory = []){
       this.down = down;
       this.right = right;
       this.maxHp = maxHp;
       this.hp = maxHp;
       this.maxHunger = maxHunger;
       this.hunger = maxHunger;
+      this.inventory = inventory;
     }
     moveRight(){
       this.right += 1;
@@ -136,7 +137,12 @@ On unit tests:
         this.hp -= 1;
       }
     }
+    eatFood(food){
+      this.inventory.splice(this.inventory.indexOf(food), 1);
+    }
   }
+  
+  class Food{}
   
   const Command = {
     MoveRight: Symbol("MoveRight"),
@@ -144,9 +150,18 @@ On unit tests:
     MoveDown: Symbol("MoveDown"),
     MoveUp: Symbol("MoveUp")
   }
+  class MoveRightCommand {}
+  class MoveLeftCommand {}
+  class MoveDownCommand {}
+  class MoveUpCommand {}
+  class EatFoodCommand {
+    constructor(food){
+      this.food = food;
+    }
+  }
   
   class Game {
-    constructor(map, player){
+    constructor(map = [[]], player = new Player()){
       this.map = map;
       this.player = player;
       this.gameOver = false;
@@ -179,15 +194,17 @@ On unit tests:
       }
       this.player.moveUp();
     }
-    handleMovement(command){
-      if (command === Command.MoveRight){
+    handlePlayerCommands(command, food){
+      if (command instanceof MoveRightCommand){
         this.movePlayerRight();
-      } else if (command === Command.MoveLeft){
+      } else if (command instanceof MoveLeftCommand){
         this.movePlayerLeft();
-      } else if (command === Command.MoveDown){
+      } else if (command instanceof MoveDownCommand){
         this.movePlayerDown();
-      } else if (command === Command.MoveUp) {
+      } else if (command instanceof MoveUpCommand) {
         this.movePlayerUp();
+      } else if (command instanceof EatFoodCommand){
+        this.player.eatFood(command.food);
       }
     }
     checkForGameOver(){
@@ -196,21 +213,21 @@ On unit tests:
       }
     }
     
-    update(command){
+    update(command, item){
       if (this.gameOver){
         return;
       }
-      this.handleMovement(command);
+      this.handlePlayerCommands(command, item);
       this.checkForGameOver();
     }
   }
   {
     const errMsg = "Move command should move player";
     [
-      [[0, 1], [0, 0], Command.MoveRight, "right"],
-      [[0, 0], [0, 1], Command.MoveLeft, "left"],
-      [[1, 0], [0, 0], Command.MoveDown, "down"],
-      [[0, 0], [1, 0], Command.MoveUp, "up"]
+      [[0, 1], [0, 0], new MoveRightCommand(), "right"],
+      [[0, 0], [0, 1], new MoveLeftCommand(), "left"],
+      [[1, 0], [0, 0], new MoveDownCommand(), "down"],
+      [[0, 0], [1, 0], new MoveUpCommand(), "up"]
     ].forEach(([[expectedDown, expectedRight], [startX, startY], command, direction]) => {
       const player = new Player(startX, startY);
       const game = new Game([[1,2],[3,4]], player);
@@ -222,10 +239,10 @@ On unit tests:
   {
     const errMsg = "Player shouldn't move outside of map when moving";
     [
-      [Command.MoveRight, "right"],
-      [Command.MoveLeft, "left"],
-      [Command.MoveDown, "down"],
-      [Command.MoveUp, "up"]
+      [new MoveRightCommand(), "right"],
+      [new MoveLeftCommand(), "left"],
+      [new MoveDownCommand(), "down"],
+      [new MoveUpCommand(), "up"]
     ].forEach(([command, direction]) => {
       const player = new Player(0, 0);
       const game = new Game([[0]], player);
@@ -237,10 +254,10 @@ On unit tests:
   {
     const errMsg = "moving should reduce hunger";
     
-    [Command.MoveRight, Command.MoveLeft, Command.MoveDown, Command.MoveUp].forEach(()=>{
+    [new MoveRightCommand(), new MoveLeftCommand(), new MoveDownCommand(), new MoveUpCommand()].forEach((command)=>{
       const player = new Player(1, 1, 100, 100);
       const game = new Game([[0, 0, 0], [0, 0, 0], [0, 0, 0]], player);
-      game.update(Command.MoveRight);
+      game.update(command);
       assert(99 === game.player.hunger, errMsg);
     });
   }
@@ -248,35 +265,35 @@ On unit tests:
     const errMsg = "hunger should not reduce for failed move"
     const player = new Player(0, 0, 100, 100);
     const game = new Game([[0]], player);
-    game.update(Command.MoveRight);
+    game.update(new MoveRightCommand());
     assert(100 === game.player.hunger, errMsg);
   }
   {
     const errMsg = "hunger should not reduce to below 0";
     const player = new Player(0, 0, 100, 0);
     const game = new Game([[0, 0]], player);
-    game.update(Command.MoveRight);
+    game.update(new MoveRightCommand());
     assert(0 === game.player.hunger, errMsg);
   }
   {
     const errMsg = "hp should reduce by 1 when hunger is 0"
     const player = new Player(0, 0, 100, 0);
     const game = new Game([[0, 0]], player);
-    game.update(Command.MoveRight);
+    game.update(new MoveRightCommand());
     assert(99 === game.player.hp, errMsg);
   }
   {
     const errMsg = "hp should not reduce when hunger is not 0"
     const player = new Player(0, 0, 100, 100);
     const game = new Game([[0, 0]], player);
-    game.update(Command.MoveRight);
+    game.update(new MoveRightCommand());
     assert(100 === game.player.hp, errMsg);
   }
   {
     const errMsg = "game should finish if hp is 0"
     const player = new Player(0, 0, 1, 0);
     const game = new Game([[0, 0]], player);
-    game.update(Command.MoveRight);
+    game.update(new MoveRightCommand());
     assert(true === game.gameOver, errMsg);
   }
   {
@@ -284,18 +301,24 @@ On unit tests:
     const player = new Player(0, 0, 100, 100);
     const game = new Game([[0, 0]], player);
     game.gameOver = true;
-    game.update(Command.MoveRight);
+    game.update(new MoveRightCommand());
     assert(100 === game.player.hunger, errMsg);
   }
   {
-    const errMsg = "using item should remove it from inventory"
+    const errMsg = "using item should remove it from inventory";
+    const food = new Food();
+    const player = new Player(0,0,0,0,[food]);
+    const game = new Game([[0, 0]], player);
+    game.update(new EatFoodCommand(food));
+    assert(game.player.inventory.length === 0, errMsg);
   }
   {
-    const errMsg = "eating food should increase hunger"
+    const errMsg = "eating food should increase hunger by nutrients minus one"
   }
   {
     const errMsg = "hunger should not increase above max hunger"
   }
+  //try code block instead of monospace
   
   const Display = {
     GroundTile: Symbol("GroundTile"),
