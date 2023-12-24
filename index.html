@@ -149,6 +149,7 @@ On unit tests:
     constructor(map, player){
       this.map = map;
       this.player = player;
+      this.gameOver = false;
     }
     
     movePlayerRight(){
@@ -178,8 +179,7 @@ On unit tests:
       }
       this.player.moveUp();
     }
-    
-    update(command){
+    handleMovement(command){
       if (command === Command.MoveRight){
         this.movePlayerRight();
       } else if (command === Command.MoveLeft){
@@ -189,6 +189,19 @@ On unit tests:
       } else if (command === Command.MoveUp) {
         this.movePlayerUp();
       }
+    }
+    checkForGameOver(){
+      if (this.player.hp <= 0){
+        this.gameOver = true;
+      }
+    }
+    
+    update(command){
+      if (this.gameOver){
+        return;
+      }
+      this.handleMovement(command);
+      this.checkForGameOver();
     }
   }
   {
@@ -261,6 +274,27 @@ On unit tests:
   }
   {
     const errMsg = "game should finish if hp is 0"
+    const player = new Player(0, 0, 1, 0);
+    const game = new Game([[0, 0]], player);
+    game.update(Command.MoveRight);
+    assert(true === game.gameOver, errMsg);
+  }
+  {
+    const errMsg = "commands shouldnt process when game over";
+    const player = new Player(0, 0, 100, 100);
+    const game = new Game([[0, 0]], player);
+    game.gameOver = true;
+    game.update(Command.MoveRight);
+    assert(100 === game.player.hunger, errMsg);
+  }
+  {
+    const errMsg = "using item should remove it from inventory"
+  }
+  {
+    const errMsg = "eating food should increase hunger"
+  }
+  {
+    const errMsg = "hunger should not increase above max hunger"
   }
   
   const Display = {
