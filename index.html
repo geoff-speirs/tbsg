@@ -139,8 +139,10 @@ On unit tests:
     }
     eatFood(food){
       this.hunger += food.sustenance;
+      if (this.hunger >= this.maxHunger){
+        this.hunger = this.maxHunger;
+      }
       this.inventory.splice(this.inventory.indexOf(food), 1);
-      this.applyHunger();
     }
   }
   
@@ -313,16 +315,23 @@ On unit tests:
     assert(game.player.inventory.length === 0, errMsg);
   }
   {
-    const errMsg = "eating food should increase hunger by nutrients minus one"
+    const errMsg = "eating food should increase hunger by food sustenance"
     const food = new Food(50);
-    const player = new Player(0,0,100,1,[food]);
+    const player = new Player(0,0,100,100,[food]);
+    player.hunger = 1;
     const game = new Game([[0, 0]], player);
     game.update(new EatFoodCommand(food));
-    assert(game.player.hunger === 50, errMsg);
+    assert(game.player.hunger === 51, errMsg);
   }
   {
     const errMsg = "hunger should not increase above max hunger"
+    const food = new Food(50);
+    const player = new Player(0,0,100,100,[food]);
+    const game = new Game([[0, 0]], player);
+    game.update(new EatFoodCommand(food));
+    assert(game.player.hunger === 100, errMsg);
   }
+  //create ui to use inventory
   //try code block instead of monospace
   
   const Display = {
