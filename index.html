@@ -138,18 +138,18 @@ On unit tests:
       }
     }
     eatFood(food){
+      this.hunger += food.sustenance;
       this.inventory.splice(this.inventory.indexOf(food), 1);
+      this.applyHunger();
     }
   }
   
-  class Food{}
-  
-  const Command = {
-    MoveRight: Symbol("MoveRight"),
-    MoveLeft: Symbol("MoveLeft"),
-    MoveDown: Symbol("MoveDown"),
-    MoveUp: Symbol("MoveUp")
+  class Food{
+    constructor(sustenance = 0){
+      this.sustenance = sustenance;
+    }
   }
+  
   class MoveRightCommand {}
   class MoveLeftCommand {}
   class MoveDownCommand {}
@@ -307,13 +307,18 @@ On unit tests:
   {
     const errMsg = "using item should remove it from inventory";
     const food = new Food();
-    const player = new Player(0,0,0,0,[food]);
+    const player = new Player(0,0,100,100,[food]);
     const game = new Game([[0, 0]], player);
     game.update(new EatFoodCommand(food));
     assert(game.player.inventory.length === 0, errMsg);
   }
   {
     const errMsg = "eating food should increase hunger by nutrients minus one"
+    const food = new Food(50);
+    const player = new Player(0,0,100,1,[food]);
+    const game = new Game([[0, 0]], player);
+    game.update(new EatFoodCommand(food));
+    assert(game.player.hunger === 50, errMsg);
   }
   {
     const errMsg = "hunger should not increase above max hunger"
@@ -392,31 +397,31 @@ On unit tests:
   document.addEventListener("keydown", (event) => {
     switch (event.code) {
       case "KeyH":
-        game.update(Command.MoveLrft);
+        game.update(new MoveLeftCommand());
         break;
       case "KeyJ":
-        game.update(Command.MoveDown);
+        game.update(new MoveDownCommand());
         break;
       case "KeyK":
-        game.update(Command.MoveUp);
+        game.update(new MoveUpCommand());
         break;
       case "KeyL":
-        game.update(Command.MoveRight);
+        game.update(new MoveRightCommand());
         break;
     }
   });
   
   document.getElementById("h_button").onclick = (event) => {
-    engine.progress(Command.MoveLeft)
+    engine.progress(new MoveLeftCommand())
   };  
   document.getElementById("j_button").onclick = (event) => {
-    engine.progress(Command.MoveDown)
+    engine.progress(new MoveDownCommand())
   };  
   document.getElementById("k_button").onclick = (event) => {
-    engine.progress(Command.MoveUp)
+    engine.progress(new MoveUpCommand())
   };  
   document.getElementById("l_button").onclick = (event) => {
-    engine.progress(Command.MoveRight)
+    engine.progress(new MoveRightCommand())
   };
 }
   
