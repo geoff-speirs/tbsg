@@ -336,8 +336,18 @@ On unit tests:
     game.update(new EatFoodCommand(food));
     assert(game.player.hunger === 100, errMsg);
   }
-  //create ui to use inventory
-  //try code block instead of monospace
+  {
+    errMsg = "food tiles shpuld be generated";
+  }
+  {
+    errMsg = "walking on food should remove it from ground";
+  }
+  {
+    errMsg = "walking on food shod at it to inventory";
+  }
+  {
+    errMsg = "food should rwndomly generate";
+  }
   
   const Display = {
     GroundTile: Symbol("GroundTile"),
@@ -411,7 +421,7 @@ On unit tests:
     }
   }
   const food = new Food(5);
-  const player = new Player(0, 0, 10, 10, [food, food, food]);
+  const player = new Player(0, 0, 10, 10, [food]);
   const game = new Game([[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0]], player);
   const engine = new Engine(game);
   engine.render();
