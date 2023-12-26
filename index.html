@@ -7,8 +7,8 @@
   <title></title>
 </head>
 
-<body>
-<p id="map" style="white-space: pre; font-family:monospace;">
+<body style="font-family:monospace;">
+<p id="map" style="white-space: pre;">
   Starting...
 </p>
 <p>
@@ -18,9 +18,13 @@
   <button type="button" id="l_button">L</button>
   <button type="button" id="eat_button">Eat</button>
 </p>
-<p style="font-family:monospace;">HP: <span id="hp"></span></p>
-<p style="font-family:monospace;">Hunger: <span id="hunger"></span></p>
-
+<p>HP: <span id="hp"></span></p>
+<p>Hunger: <span id="hunger"></span></p>
+<p>
+  Inventory:
+  <ul id="inventory_list">
+  </ul>
+</p>
 <script>
 {
 /*
@@ -381,6 +385,7 @@ On unit tests:
   const mapElem = document.getElementById("map");
   const hpElem = document.getElementById("hp");
   const hungerElem = document.getElementById("hunger");
+  const inventoryElem = document.getElementById("inventory_list");
   class Engine {
     constructor(game){
       this.game = game;
@@ -396,10 +401,17 @@ On unit tests:
       mapElem.textContent = render(tiles);
       hpElem.textContent = `${game.player.hp}/${game.player.maxHp}`;
       hungerElem.textContent = `${game.player.hunger}/${game.player.maxHunger}`;
+      
+      const inventoryListItems = engine.game.player.inventory.map(item => {
+        const li = document.createElement("li");
+        li.textContent = "Food";
+        return li;
+      });
+      inventoryElem.replaceChildren(...inventoryListItems);
     }
   }
   const food = new Food(5);
-  const player = new Player(0, 0, 10, 10, [food]);
+  const player = new Player(0, 0, 10, 10, [food, food, food]);
   const game = new Game([[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0]], player);
   const engine = new Engine(game);
   engine.render();
