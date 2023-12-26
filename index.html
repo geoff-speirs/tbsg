@@ -16,6 +16,7 @@
   <button type="button" id="j_button">J</button>
   <button type="button" id="k_button">K</button>
   <button type="button" id="l_button">L</button>
+  <button type="button" id="eat_button">Eat</button>
 </p>
 <p style="font-family:monospace;">HP: <span id="hp"></span></p>
 <p style="font-family:monospace;">Hunger: <span id="hunger"></span></p>
@@ -23,7 +24,7 @@
 <script>
 {
 /*
-This whole project is in one file for the following reasons:
+This whole profject is in one file for the following reasons:
 - Making dev environments as close as possible to production. As a single file you are developing on exactly the same environment that gets loaded in prod.
 - Needing less tooling. Most browsers don't let you load other files uness it is in a hosted environment. By using a single file we can load and test the project by opening the single file in any browser.
 - Simplicity. By keeping all code in one file we minimise any knowledge required outside of html, css and JavaScript.
@@ -397,8 +398,8 @@ On unit tests:
       hungerElem.textContent = `${game.player.hunger}/${game.player.maxHunger}`;
     }
   }
-  
-  const player = new Player(0, 0, 10, 10);
+  const food = new Food(5);
+  const player = new Player(0, 0, 10, 10, [food]);
   const game = new Game([[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0]], player);
   const engine = new Engine(game);
   engine.render();
@@ -431,6 +432,12 @@ On unit tests:
   };  
   document.getElementById("l_button").onclick = (event) => {
     engine.progress(new MoveRightCommand())
+  };
+  document.getElementById("eat_button").onclick = (event) => {
+    const food = engine.game.player.inventory.find(((item) => item instanceof Food))
+    if (food){
+      engine.progress(new EatFoodCommand(food));
+    }
   };
 }
   
