@@ -153,13 +153,13 @@ On unit tests:
   
   class Item {}
   class Food extends Item{
-    constructor(sustenance = 0){
+    constructor(sustenance = 5){
       super();
       this.sustenance = sustenance;
     }
   }
   class MapItem {
-    constructor(item, down, right){
+    constructor(item = new Item(), down = 0, right = 0){
       this.item = item,
       this.down = down;
       this.right = right;
@@ -390,13 +390,12 @@ On unit tests:
   }
   {
     errMsg = "food tiles should be generated";
-    const food = new Food(5);
-    const mapItem = new MapItem(food, 1, 0);
+    const mapItem = new MapItem(new Food(), 1, 0);
     const player = new Player();
     const food2 = new Food(5);
     const mapItem2 = new MapItem(food2, 1, 1);
     const game = new Game([[0,0],[0,0]], player, [mapItem, mapItem2]);
-    const tiles = generateTiles(game, player);
+    const tiles = generateTiles(game);
     assert(tiles[1][0] === Display.FoodTile, errMsg);
     assert(tiles[1][1] === Display.FoodTile, errMsg);
   }
@@ -411,6 +410,8 @@ On unit tests:
           return ",";
           case Display.PlayerTile:
           return "@";
+          case Display.FoodTile:
+          return "o";
         }
       }
       ).join("")).join("\n");
@@ -446,8 +447,9 @@ On unit tests:
     }
   }
   const food = new Food(5);
+  const mapItem = new MapItem(food, 2, 2);
   const player = new Player(0, 0, 10, 10, [food]);
-  const game = new Game([[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0]], player);
+  const game = new Game([[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0]], player, [mapItem]);
   const engine = new Engine(game);
   engine.render();
   
