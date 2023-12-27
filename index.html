@@ -187,6 +187,9 @@ On unit tests:
       }
       this.inventory.splice(this.inventory.indexOf(food), 1);
     }
+    pickUpItem(item){
+      this.inventory.push(item);
+    }
   }
   
   class Item {}
@@ -251,6 +254,7 @@ On unit tests:
         this.player.right === mapItem.right);
       if (pickupItem){
         this.mapItems.splice(this.mapItems.indexOf(pickupItem), 1);
+        this.player.pickUpItem(pickupItem.item);
       }
     }
     
@@ -406,6 +410,12 @@ On unit tests:
   }
   {
     errMsg = "walking on food should add it to inventory";
+    const player = new Player(0, 0);
+    const food = new Food();
+    const mapItem = new MapItem(food, 0, 1);
+    const game = new Game ([0, 0], player, [mapItem]);
+    game.update(new MoveRightCommand());
+    assertEquals(food, game.player.inventory[0], errMsg);
   }
   {
     errMsg = "food should rwndomly generate";
