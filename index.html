@@ -77,6 +77,44 @@ On unit tests:
     }
   }
   
+  const assertEquals = (expected, actual, message) => {
+    if (expected !== actual){
+      throw new Error(`${message}: expected ${actual} to be ${expected}`);
+    }
+  };
+  {
+    const errMsg = "assertEquals should throw error if actual is not expected";
+    class TestAssertError extends Error {}
+    try {
+      assertEquals("yes", "no");
+      throw new TestAssertError(errMsg);
+    } catch (e) {
+      if (e instanceof TestAssertError) {
+        throw new Error(errMsg);
+      }
+    }
+  }
+  {
+    const errMsg = "assertEquals should not throw error if fact is true";
+    try {
+      assertEquals("yes", "yes");
+    } catch (e) {
+      throw new Error(errMsg);
+    }
+  }
+  {
+    const errMsg = "assertEquals should throw error with specified error message and comparison";
+    const testMsg = "test error message";
+    try {
+      assertEquals("no", "yes", testMsg);
+    } catch (e) {
+      const msgCorrect = e.message === "test error message: expected yes to be no";
+      if (!msgCorrect) {
+        throw new Error(errMsg);
+      }
+    }
+  }
+  
   const throwsError = (func, errorClass) => {
     try {
       func();
@@ -261,8 +299,8 @@ On unit tests:
       const player = new Player(startX, startY);
       const game = new Game([[1,2],[3,4]], player);
       game.update(command);
-      assert(expectedDown === game.player.down, `${errMsg} ${direction}`);
-      assert(expectedRight === game.player.right, `${errMsg} ${direction}`);
+      assertEquals(expectedDown, game.player.down, `${errMsg} ${direction}`);
+      assertEquals(expectedRight, game.player.right, `${errMsg} ${direction}`);
     });
   }
   {
@@ -276,8 +314,8 @@ On unit tests:
       const player = new Player(0, 0);
       const game = new Game([[0]], player);
       game.update(command);
-      assert(0 === game.player.right, `${errMsg} ${direction}`);
-      assert(0 === game.player.down, `${errMsg} ${direction}`);
+      assertEquals(0, game.player.right, `${errMsg} ${direction}`);
+      assertEquals(0, game.player.down, `${errMsg} ${direction}`);
     });
   }
   {
@@ -287,7 +325,7 @@ On unit tests:
       const player = new Player(1, 1, 100, 100);
       const game = new Game([[0, 0, 0], [0, 0, 0], [0, 0, 0]], player);
       game.update(command);
-      assert(99 === game.player.hunger, errMsg);
+      assertEquals(99, game.player.hunger, errMsg);
     });
   }
   {
@@ -295,35 +333,35 @@ On unit tests:
     const player = new Player(0, 0, 100, 100);
     const game = new Game([[0]], player);
     game.update(new MoveRightCommand());
-    assert(100 === game.player.hunger, errMsg);
+    assertEquals(100, game.player.hunger, errMsg);
   }
   {
     const errMsg = "hunger should not reduce to below 0";
     const player = new Player(0, 0, 100, 0);
     const game = new Game([[0, 0]], player);
     game.update(new MoveRightCommand());
-    assert(0 === game.player.hunger, errMsg);
+    assertEquals(0, game.player.hunger, errMsg);
   }
   {
     const errMsg = "hp should reduce by 1 when hunger is 0"
     const player = new Player(0, 0, 100, 0);
     const game = new Game([[0, 0]], player);
     game.update(new MoveRightCommand());
-    assert(99 === game.player.hp, errMsg);
+    assertEquals(99, game.player.hp, errMsg);
   }
   {
     const errMsg = "hp should not reduce when hunger is not 0"
     const player = new Player(0, 0, 100, 100);
     const game = new Game([[0, 0]], player);
     game.update(new MoveRightCommand());
-    assert(100 === game.player.hp, errMsg);
+    assertEquals(100, game.player.hp, errMsg);
   }
   {
     const errMsg = "game should finish if hp is 0"
     const player = new Player(0, 0, 1, 0);
     const game = new Game([[0, 0]], player);
     game.update(new MoveRightCommand());
-    assert(true === game.gameOver, errMsg);
+    assert(game.gameOver, errMsg);
   }
   {
     const errMsg = "commands shouldnt process when game over";
@@ -331,7 +369,7 @@ On unit tests:
     const game = new Game([[0, 0]], player);
     game.gameOver = true;
     game.update(new MoveRightCommand());
-    assert(100 === game.player.hunger, errMsg);
+    assertEquals(100, game.player.hunger, errMsg);
   }
   {
     const errMsg = "using item should remove it from inventory";
@@ -339,7 +377,7 @@ On unit tests:
     const player = new Player(0,0,100,100,[food]);
     const game = new Game([[0, 0]], player);
     game.update(new EatFoodCommand(food));
-    assert(game.player.inventory.length === 0, errMsg);
+    assertEquals(0, game.player.inventory.length, errMsg);
   }
   {
     const errMsg = "eating food should increase hunger by food sustenance"
@@ -348,7 +386,7 @@ On unit tests:
     player.hunger = 1;
     const game = new Game([[0, 0]], player);
     game.update(new EatFoodCommand(food));
-    assert(game.player.hunger === 51, errMsg);
+    assertEquals(51, game.player.hunger, errMsg);
   }
   {
     const errMsg = "hunger should not increase above max hunger"
@@ -356,7 +394,7 @@ On unit tests:
     const player = new Player(0,0,100,100,[food]);
     const game = new Game([[0, 0]], player);
     game.update(new EatFoodCommand(food));
-    assert(game.player.hunger === 100, errMsg);
+    assertEquals(100, game.player.hunger, errMsg);
   }
   {
     errMsg = "walking on food should remove it from ground";
@@ -364,10 +402,10 @@ On unit tests:
     const mapItem = new MapItem(new Food(), 0, 1);
     const game = new Game ([0, 0], player, [mapItem]);
     game.update(new MoveRightCommand());
-    assert(game.mapItems.length === 0, errMsg);
+    assertEquals(0, game.mapItems.length, errMsg);
   }
   {
-    errMsg = "walking on food shod at it to inventory";
+    errMsg = "walking on food should add it to inventory";
   }
   {
     errMsg = "food should rwndomly generate";
