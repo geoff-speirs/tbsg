@@ -371,36 +371,21 @@ On unit tests:
     return tiles;
   };
   {
-    const errMsg = "should generate ground tiles";
-    [
-      [0, 0], [1, 1]
-    ].forEach(([down, right]) => {
-      const result = generateTiles(new Game([[0, 1], [2, 3]], new Player(0, 1)));
-      assert(Display.GroundTile === result[down][right], errMsg);
-    });
-  }
-  {
-    const errMsg = "should generate player tile";
-    [
-      [0,0], [1,1]
-    ].forEach(([down, right]) => {
-      const result = generateTiles(new Game([[1,2],[3,4]], new Player(down, right)));
-      assert(Display.PlayerTile === result[down][right], errMsg);
-    });
-  }
-  {
-    errMsg = "food tiles should be generated";
-    const mapItem = new MapItem(new Food(), 1, 0);
-    const player = new Player();
+    errMsg = "should generate tiles";
+    const mapItem = new MapItem(new Food(), 0, 1);
+    const player = new Player(1,1);
     const food2 = new Food(5);
-    const mapItem2 = new MapItem(food2, 1, 1);
+    const mapItem2 = new MapItem(food2, 1,0);
     const game = new Game([[0,0],[0,0]], player, [mapItem, mapItem2]);
     const tiles = generateTiles(game);
-    assert(tiles[1][0] === Display.FoodTile, errMsg);
-    assert(tiles[1][1] === Display.FoodTile, errMsg);
+    assert(tiles[0][0] === Display.GroundTile, `${errMsg} for ground`);
+    assert(tiles[1][1] === Display.PlayerTile, `${errMsg} for player`);
+    assert(tiles[1][0] === Display.FoodTile, `${errMsg} for food`);
+    assert(tiles[0][1] === Display.FoodTile, `${errMsg} for food`);
   }
   //rename result to tiles in other tests
-  //refactor generateTiles to just use game.
+  //put all tests in same place (backlogify)
+  //
   
   //Below here is I/O code that won't be tested
   const render = (tiles) => {
