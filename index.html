@@ -151,9 +151,18 @@ On unit tests:
     }
   }
   
-  class Food{
+  class Item {}
+  class Food extends Item{
     constructor(sustenance = 0){
+      super();
       this.sustenance = sustenance;
+    }
+  }
+  class MapItem {
+    constructor(item, down, right){
+      this.item = item,
+      this.down = down;
+      this.right = right;
     }
   }
   
@@ -168,10 +177,11 @@ On unit tests:
   }
   
   class Game {
-    constructor(map = [[]], player = new Player()){
+    constructor(map = [[]], player = new Player(), mapItems = []){
       this.map = map;
       this.player = player;
       this.gameOver = false;
+      this.mapItems = mapItems;
     }
     
     movePlayerRight(){
@@ -337,9 +347,6 @@ On unit tests:
     assert(game.player.hunger === 100, errMsg);
   }
   {
-    errMsg = "food tiles shpuld be generated";
-  }
-  {
     errMsg = "walking on food should remove it from ground";
   }
   {
@@ -351,12 +358,16 @@ On unit tests:
   
   const Display = {
     GroundTile: Symbol("GroundTile"),
-    PlayerTile: Symbol("PlayerTile")
+    PlayerTile: Symbol("PlayerTile"),
+    FoodTile: Symbol("FoodTile")
   }
   
   const generateTiles = (game) => {
     var tiles = game.map.map((lines) => lines.map(tile => Display.GroundTile));
     tiles[game.player.down][game.player.right] = Display.PlayerTile;
+    game.mapItems.forEach((mapItem)=>{
+      tiles[mapItem.down][mapItem.right] = Display.FoodTile;
+    })
     return tiles;
   };
   {
@@ -377,6 +388,20 @@ On unit tests:
       assert(Display.PlayerTile === result[down][right], errMsg);
     });
   }
+  {
+    errMsg = "food tiles should be generated";
+    const food = new Food(5);
+    const mapItem = new MapItem(food, 1, 0);
+    const player = new Player();
+    const food2 = new Food(5);
+    const mapItem2 = new MapItem(food2, 1, 1);
+    const game = new Game([[0,0],[0,0]], player, [mapItem, mapItem2]);
+    const tiles = generateTiles(game, player);
+    assert(tiles[1][0] === Display.FoodTile, errMsg);
+    assert(tiles[1][1] === Display.FoodTile, errMsg);
+  }
+  //rename result to tiles in other tests
+  //refactor generateTiles to just use game.
   
   //Below here is I/O code that won't be tested
   const render = (tiles) => {
