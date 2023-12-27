@@ -184,6 +184,38 @@ On unit tests:
       this.mapItems = mapItems;
     }
     
+    update(command, item) {
+      if (this.gameOver) {
+        return;
+      }
+      this.handlePlayerCommands(command, item);
+      this.checkForPickupItems();
+      this.checkForGameOver();
+    }
+    
+    handlePlayerCommands(command, food){
+      if (command instanceof MoveRightCommand){
+        this.movePlayerRight();
+      } else if (command instanceof MoveLeftCommand){
+        this.movePlayerLeft();
+      } else if (command instanceof MoveDownCommand){
+        this.movePlayerDown();
+      } else if (command instanceof MoveUpCommand) {
+        this.movePlayerUp();
+      } else if (command instanceof EatFoodCommand){
+        this.player.eatFood(command.food);
+      }
+    }
+    
+    checkForPickupItems(){
+      const pickupItem = this.mapItems.find((mapItem) => 
+        this.player.down === mapItem.down &&
+        this.player.right === mapItem.right);
+      if (pickupItem){
+        this.mapItems.splice(this.mapItems.indexOf(pickupItem), 1);
+      }
+    }
+    
     movePlayerRight(){
       if(this.player.right + 1 >= this.map[this.player.down].length){
         return;
@@ -211,31 +243,11 @@ On unit tests:
       }
       this.player.moveUp();
     }
-    handlePlayerCommands(command, food){
-      if (command instanceof MoveRightCommand){
-        this.movePlayerRight();
-      } else if (command instanceof MoveLeftCommand){
-        this.movePlayerLeft();
-      } else if (command instanceof MoveDownCommand){
-        this.movePlayerDown();
-      } else if (command instanceof MoveUpCommand) {
-        this.movePlayerUp();
-      } else if (command instanceof EatFoodCommand){
-        this.player.eatFood(command.food);
-      }
-    }
+
     checkForGameOver(){
       if (this.player.hp <= 0){
         this.gameOver = true;
       }
-    }
-    
-    update(command, item){
-      if (this.gameOver){
-        return;
-      }
-      this.handlePlayerCommands(command, item);
-      this.checkForGameOver();
     }
   }
   {
@@ -348,6 +360,11 @@ On unit tests:
   }
   {
     errMsg = "walking on food should remove it from ground";
+    const player = new Player(0, 0);
+    const mapItem = new MapItem(new Food(), 0, 1);
+    const game = new Game ([0, 0], player, [mapItem]);
+    game.update(new MoveRightCommand());
+    assert(game.mapItems.length === 0, errMsg);
   }
   {
     errMsg = "walking on food shod at it to inventory";
