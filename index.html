@@ -230,25 +230,41 @@ On unit tests:
       if (this.gameOver) {
         return;
       }
+      if (!this.isValidCommand(command)){
+        return;
+      }
+
       this.handlePlayerCommands(command);
       this.checkForPickupItems();
       this.checkForGameOver();
       this.dropRandomItems(dropRandom, posRandom);
     }
     
-    placeRandomItem(item, random){
-      
+    isValidCommand(command){
+      if(command instanceof MoveRightCommand && this.player.right + 1 >= this.map[this.player.down].length){
+        return false;
+      }
+      if(command instanceof MoveLeftCommand && this.player.right - 1 < 0){
+        return false;
+      } 
+      if(command instanceof MoveDownCommand && this.player.down + 1 >= this.map.length){
+        return false;
+      }
+      if (command instanceof MoveUpCommand && this.player.down - 1 < 0) {
+        return false;
+      }
+      return true;
     }
     
     handlePlayerCommands(command, food){
       if (command instanceof MoveRightCommand){
-        this.movePlayerRight();
+        this.player.moveRight();
       } else if (command instanceof MoveLeftCommand){
-        this.movePlayerLeft();
+        this.player.moveLeft();
       } else if (command instanceof MoveDownCommand){
-        this.movePlayerDown();
+        this.player.moveDown();
       } else if (command instanceof MoveUpCommand) {
-        this.movePlayerUp();
+        this.player.moveUp();
       } else if (command instanceof EatFoodCommand){
         this.player.eatFood(command.food);
       }
@@ -270,34 +286,6 @@ On unit tests:
         const right = Math.floor(((posRandom % (1 / this.map.length))) * this.map.length * this.map[0].length);
         this.mapItems.push(new MapItem(new Food(), down, right));
       }
-    }
-    
-    movePlayerRight(){
-      if(this.player.right + 1 >= this.map[this.player.down].length){
-        return;
-      }
-      this.player.moveRight();
-    }
-    
-    movePlayerLeft(){
-      if(this.player.right - 1 < 0){
-        return;
-      }
-      this.player.moveLeft();
-    }
-    
-    movePlayerDown(){
-      if(this.player.down + 1 >= this.map.length){
-        return;
-      }
-      this.player.moveDown();
-    }
-    
-    movePlayerUp() {
-      if (this.player.down - 1 < 0) {
-        return;
-      }
-      this.player.moveUp();
     }
 
     checkForGameOver(){
@@ -452,10 +440,16 @@ On unit tests:
       [0.9, 1, 1, "bottom right"]
     ].forEach(([random, expectedDown, expectedRight, locMsg])=>{
       const game = new Game([[0, 0],[0, 0]], new Player(), [], 0.1);
-      game.update(new MoveRightCommand(), 0.05, random)
+      game.update(new MoveRightCommand(), 0.05, random);
       assertEquals(expectedDown, game.mapItems[0].down, `${errMsg} at ${locMsg}`);
       assertEquals(expectedRight, game.mapItems[0].right, `${errMsg} at ${locMsg}`);
     });
+  }
+  {
+    const errMsg = "dont generate food when walking into wall";
+    const game = new Game([[0, 0]], new Player(), [], 0.1);
+    game.update(new MoveUpCommand(), 0.05);
+    assertEquals(0, game.mapItems.length, errMsg);
   }
   //dont spawn food when walking into wall
   //dont render food over player
