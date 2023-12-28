@@ -451,11 +451,6 @@ On unit tests:
     game.update(new MoveUpCommand(), 0.05);
     assertEquals(0, game.mapItems.length, errMsg);
   }
-  //dont spawn food when walking into wall
-  //dont render food over player
-  {
-    const errMsg = "get random location on map based on two randoms";
-  }
   {
     
     const errMsg = "tiles should only be generated for specified distance from player"
@@ -473,9 +468,9 @@ On unit tests:
   
   const generateTiles = (game) => {
     var tiles = game.map.map((lines) => lines.map(tile => Display.GroundTile));
-    tiles[game.player.down][game.player.right] = Display.PlayerTile;
     game.mapItems.forEach((mapItem)=>{
       tiles[mapItem.down][mapItem.right] = Display.FoodTile;
+    tiles[game.player.down][game.player.right] = Display.PlayerTile;
     })
     return tiles;
   };
@@ -491,6 +486,14 @@ On unit tests:
     assert(tiles[1][1] === Display.PlayerTile, `${errMsg} for player`);
     assert(tiles[1][0] === Display.FoodTile, `${errMsg} for food`);
     assert(tiles[0][1] === Display.FoodTile, `${errMsg} for food`);
+  }
+  {
+    errMsg = "should render player on top of items";
+    const mapItem = new MapItem(new Food(), 0, 0);
+    const player = new Player(0, 0);
+    const game = new Game([[0]], player, [mapItem]);
+    const tiles = generateTiles(game);
+    assert(tiles[0][0] === Display.PlayerTile, errMsg);
   }
   
   //Below here is I/O code that won't be tested
