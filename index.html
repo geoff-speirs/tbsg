@@ -234,6 +234,12 @@ On unit tests:
       this.checkForGameOver();
     }
     
+    placeRandomItem(item, random){
+      const down = Math.floor(random * this.map.length);
+      const right = Math.floor(((random % this.map.length) * this.map.length) * this.map[0].length);
+      this.mapItems.push(new MapItem(item, down, right));
+    }
+    
     handlePlayerCommands(command, food){
       if (command instanceof MoveRightCommand){
         this.movePlayerRight();
@@ -418,8 +424,32 @@ On unit tests:
     assertEquals(food, game.player.inventory[0], errMsg);
   }
   {
-    errMsg = "food should rwndomly generate";
+    const errMsg = "game should place food based on input";
+    [
+      [0.1, 0, 0, "top left"],
+      [0.3, 0, 1, "top right"],
+      [0.6, 1, 0, "bottom left"],
+      [0.9, 1, 1, "bottom right"]
+    ].forEach(([random, expectedDown, expectedRight, locMsg])=>{
+      const item = new Item();
+      const game = new Game([[0,0],[0,0]]);
+      game.placeRandomItem(item, random);
+      assertEquals(expectedDown, game.mapItems[0].down, `${errMsg} at ${locMsg}`);
+      assertEquals(expectedRight, game.mapItems[0].right, `${errMsg} at ${locMsg}`);
+    });
+    const game = new Game();
   }
+  {
+    const errMsg = "get random location on map based on two randoms";
+  }
+  {
+    
+    const errMsg = "tiles should only be generated for specified distance from player"
+  }
+  {
+    const errMsg = "game doesnt place item within visible palyer area"
+  }
+  //should generate two types of ground to make maps seem to scroll better
   
   const Display = {
     GroundTile: Symbol("GroundTile"),
@@ -448,9 +478,6 @@ On unit tests:
     assert(tiles[1][0] === Display.FoodTile, `${errMsg} for food`);
     assert(tiles[0][1] === Display.FoodTile, `${errMsg} for food`);
   }
-  //rename result to tiles in other tests
-  //put all tests in same place (backlogify)
-  //
   
   //Below here is I/O code that won't be tested
   const render = (tiles) => {
