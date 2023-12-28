@@ -218,26 +218,26 @@ On unit tests:
   }
   
   class Game {
-    constructor(map = [[]], player = new Player(), mapItems = []){
+    constructor(map = [[]], player = new Player(), mapItems = [], dropRate = 0){
       this.map = map;
       this.player = player;
       this.gameOver = false;
       this.mapItems = mapItems;
+      this.dropRate = dropRate;
     }
     
-    update(command, item) {
+    update(command, dropRandom = 1, posRandom = 0) {
       if (this.gameOver) {
         return;
       }
-      this.handlePlayerCommands(command, item);
+      this.handlePlayerCommands(command);
       this.checkForPickupItems();
       this.checkForGameOver();
+      this.dropRandomItems(dropRandom, posRandom);
     }
     
     placeRandomItem(item, random){
-      const down = Math.floor(random * this.map.length);
-      const right = Math.floor(((random % this.map.length) * this.map.length) * this.map[0].length);
-      this.mapItems.push(new MapItem(item, down, right));
+      
     }
     
     handlePlayerCommands(command, food){
@@ -261,6 +261,14 @@ On unit tests:
       if (pickupItem){
         this.mapItems.splice(this.mapItems.indexOf(pickupItem), 1);
         this.player.pickUpItem(pickupItem.item);
+      }
+    }
+    
+    dropRandomItems(dropRandom, posRandom){
+      if (dropRandom < this.dropRate){
+        const down = Math.floor(posRandom * this.map.length);
+        const right = Math.floor(((posRandom % (1 / this.map.length))) * this.map.length * this.map[0].length);
+        this.mapItems.push(new MapItem(new Food(), down, right));
       }
     }
     
@@ -424,6 +432,18 @@ On unit tests:
     assertEquals(food, game.player.inventory[0], errMsg);
   }
   {
+    const errMsg = "should drop item if random is within drop chance";
+    const game = new Game([[0, 0]], new Player(), [], 0.1);
+    game.update(new MoveRightCommand(), 0.05);
+    assertEquals(1, game.mapItems.length, errMsg);
+  }
+  {
+    const errMsg = "should not drop item if random is not within drop chance";
+    const game = new Game([[0, 0]], new Player(), [], 0.1);
+    game.update(new MoveRightCommand(), 0.15);
+    assertEquals(0, game.mapItems.length, errMsg);
+  }
+  {
     const errMsg = "game should place food based on input";
     [
       [0.1, 0, 0, "top left"],
@@ -431,14 +451,14 @@ On unit tests:
       [0.6, 1, 0, "bottom left"],
       [0.9, 1, 1, "bottom right"]
     ].forEach(([random, expectedDown, expectedRight, locMsg])=>{
-      const item = new Item();
-      const game = new Game([[0,0],[0,0]]);
-      game.placeRandomItem(item, random);
+      const game = new Game([[0, 0],[0, 0]], new Player(), [], 0.1);
+      game.update(new MoveRightCommand(), 0.05, random)
       assertEquals(expectedDown, game.mapItems[0].down, `${errMsg} at ${locMsg}`);
       assertEquals(expectedRight, game.mapItems[0].right, `${errMsg} at ${locMsg}`);
     });
-    const game = new Game();
   }
+  //dont spawn food when walking into wall
+  //dont render food over player
   {
     const errMsg = "get random location on map based on two randoms";
   }
@@ -505,7 +525,7 @@ On unit tests:
     }
     
     progress(command){
-      game.update(command);
+      game.update(command, Math.random(), Math. random());
       this.render();
     }
     
@@ -526,7 +546,7 @@ On unit tests:
   const food = new Food(5);
   const mapItem = new MapItem(food, 2, 2);
   const player = new Player(0, 0, 10, 10, [food]);
-  const game = new Game([[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0]], player, [mapItem]);
+  const game = new Game([[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0]], player, [mapItem], 0.1);
   const engine = new Engine(game);
   engine.render();
   
