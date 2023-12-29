@@ -451,12 +451,7 @@ On unit tests:
     game.update(new MoveUpCommand(), 0.05);
     assertEquals(0, game.mapItems.length, errMsg);
   }
-  {
-    const errMsg = "tiles should only be generated for specified distance from player"
-  }
-  {
-    const errMsg = "game doesnt place item within visible palyer area"
-  }
+  //refactor tile tests to use assertequals
   //should generate two types of ground to make maps seem to scroll better
   
   const Display = {
@@ -465,13 +460,19 @@ On unit tests:
     FoodTile: Symbol("FoodTile")
   }
   
-  const generateTiles = (game) => {
+  const generateTiles = (game, distance = 1) => {
     var tiles = game.map.map((lines) => lines.map(tile => Display.GroundTile));
     game.mapItems.forEach((mapItem)=>{
       tiles[mapItem.down][mapItem.right] = Display.FoodTile;
     });
     tiles[game.player.down][game.player.right] = Display.PlayerTile;
-    return tiles;
+    const displaySize = (distance * 2) + 1;
+    const displayStartRow = Math.min(Math.max(0, game.player.down - distance), game.map.length - displaySize);
+    const displayStartCol = Math.min(Math.max(0, game.player.right - distance), game.map[0].length - displaySize);
+    const displayRows = tiles.splice(displayStartRow, displaySize);
+    const displayTiles = displayRows.map(line => line.splice(displayStartCol, displaySize));
+   
+    return displayTiles;
   };
   {
     errMsg = "should generate tiles";
@@ -479,7 +480,7 @@ On unit tests:
     const player = new Player(1,1);
     const food2 = new Food(5);
     const mapItem2 = new MapItem(food2, 1,0);
-    const game = new Game([[0,0],[0,0]], player, [mapItem, mapItem2]);
+    const game = new Game([[0,0,0],[0,0,0],[0,0,0]], player, [mapItem, mapItem2]);
     const tiles = generateTiles(game);
     assert(tiles[0][0] === Display.GroundTile, `${errMsg} for ground`);
     assert(tiles[1][1] === Display.PlayerTile, `${errMsg} for player`);
@@ -487,19 +488,58 @@ On unit tests:
     assert(tiles[0][1] === Display.FoodTile, `${errMsg} for food`);
   }
   {
+    
     errMsg = "should render player on top of items";
     const mapItem = new MapItem(new Food(), 0, 0);
     const player = new Player(0, 0);
-    const game = new Game([[0]], player, [mapItem]);
+    const game = new Game([[0,0,0],[0,0,0],[0,0,0]], player, [mapItem]);
     const tiles = generateTiles(game);
     assert(tiles[0][0] === Display.PlayerTile, errMsg);
   }
   {
     errMsg = "should render player even when no map items";
     const player = new Player(0, 0);
-    const game = new Game([[0]], player);
+    const game = new Game([[0,0,0],[0,0,0],[0,0,0]], player);
     const tiles = generateTiles(game);
     assert(tiles[0][0] === Display.PlayerTile, errMsg);
+  }
+  {
+    const errMsg = "tiles should only be generated for specified distance from player";
+    const player = new Player(2, 2);
+    const map =
+    [
+      [0,0,0,0,0],
+      [0,0,0,0,0],
+      [0,0,0,0,0],
+      [0,0,0,0,0],
+      [0,0,0,0,0]
+    ];
+    const game = new Game(map, player);
+    const tiles = generateTiles(game, 1);
+    assertEquals(3, tiles.length, errMsg);
+    assertEquals(3, tiles[0].length, errMsg);
+  }
+  {
+    const errMsg = "should adjust display to not attempt to show outside of map";
+    const map = 
+    [
+      [0,0,0,0,0],
+      [0,0,0,0,0],
+      [0,0,0,0,0],
+      [0,0,0,0,0],
+      [0,0,0,0,0]
+    ];
+    [
+      [[0,0],[0,0], "top left"],
+      [[4,4],[2,2], "bottom right"]
+    ].forEach(([[playerDown, playerRight], [expectedDown, expectedRight], posMsg]) => {
+      const player = new Player(playerDown, playerRight);
+      const game = new Game(map, player);
+      const tiles = generateTiles(game, 1);
+      assertEquals(3, tiles.length, errMsg);
+      assertEquals(3, tiles[0].length, errMsg);
+      assertEquals(Display.PlayerTile, tiles[expectedDown][expectedRight], errMsg);
+    });
   }
   
   //Below here is I/O code that won't be tested
@@ -533,7 +573,7 @@ On unit tests:
     }
     
     render(){
-      const tiles = generateTiles(game);
+      const tiles = generateTiles(game, 3);
       mapElem.textContent = render(tiles);
       hpElem.textContent = `${game.player.hp}/${game.player.maxHp}`;
       hungerElem.textContent = `${game.player.hunger}/${game.player.maxHunger}`;
@@ -546,7 +586,7 @@ On unit tests:
       inventoryElem.replaceChildren(...inventoryListItems);
     }
   }
-  const player = new Player(10, 10, 10, 10, []);
+  const player = new Player(0, 0, 100, 100, []);
   const map = new Array(30).fill().map(_ => new Array(30).fill(0))
   const game = new Game(map, player, [], 0.1);
   const engine = new Engine(game);
