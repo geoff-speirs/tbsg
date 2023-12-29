@@ -452,7 +452,6 @@ On unit tests:
     assertEquals(0, game.mapItems.length, errMsg);
   }
   {
-    
     const errMsg = "tiles should only be generated for specified distance from player"
   }
   {
@@ -470,8 +469,8 @@ On unit tests:
     var tiles = game.map.map((lines) => lines.map(tile => Display.GroundTile));
     game.mapItems.forEach((mapItem)=>{
       tiles[mapItem.down][mapItem.right] = Display.FoodTile;
+    });
     tiles[game.player.down][game.player.right] = Display.PlayerTile;
-    })
     return tiles;
   };
   {
@@ -492,6 +491,13 @@ On unit tests:
     const mapItem = new MapItem(new Food(), 0, 0);
     const player = new Player(0, 0);
     const game = new Game([[0]], player, [mapItem]);
+    const tiles = generateTiles(game);
+    assert(tiles[0][0] === Display.PlayerTile, errMsg);
+  }
+  {
+    errMsg = "should render player even when no map items";
+    const player = new Player(0, 0);
+    const game = new Game([[0]], player);
     const tiles = generateTiles(game);
     assert(tiles[0][0] === Display.PlayerTile, errMsg);
   }
@@ -543,6 +549,7 @@ On unit tests:
   const food = new Food(5);
   const mapItem = new MapItem(food, 2, 2);
   const player = new Player(0, 0, 10, 10, [food]);
+//  the const map = 
   const game = new Game([[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0]], player, [mapItem], 0.1);
   const engine = new Engine(game);
   engine.render();
