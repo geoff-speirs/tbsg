@@ -546,11 +546,9 @@ On unit tests:
       inventoryElem.replaceChildren(...inventoryListItems);
     }
   }
-  const food = new Food(5);
-  const mapItem = new MapItem(food, 2, 2);
-  const player = new Player(0, 0, 10, 10, [food]);
-//  the const map = 
-  const game = new Game([[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0], [0,0,0,0,0],[0,0,0,0,0]], player, [mapItem], 0.1);
+  const player = new Player(10, 10, 10, 10, []);
+  const map = new Array(30).fill().map(_ => new Array(30).fill(0))
+  const game = new Game(map, player, [], 0.1);
   const engine = new Engine(game);
   engine.render();
   
