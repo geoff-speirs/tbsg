@@ -217,6 +217,11 @@ On unit tests:
     }
   }
   
+  const Ground = {
+    Grass1: Symbol("Grass1"),
+    Grass2: Symbol("Grass2"),
+  }
+  
   class Game {
     constructor(map = [[]], player = new Player(), mapItems = [], dropRate = 0){
       this.map = map;
@@ -456,12 +461,23 @@ On unit tests:
   
   const Display = {
     GroundTile: Symbol("GroundTile"),
+    GrassTile1: Symbol("GrassTile1"),
+    GrassTile2: Symbol("GrassTile2"),
     PlayerTile: Symbol("PlayerTile"),
     FoodTile: Symbol("FoodTile")
   }
   
   const generateTiles = (game, distance = 1) => {
-    var tiles = game.map.map((lines) => lines.map(tile => Display.GroundTile));
+    var tiles = game.map.map((lines) => lines.map(tile => {
+        switch(tile){
+          case Ground.Grass1:
+            return Display.GrassTile1;
+          case Ground.Grass2:
+            return Display.GrassTile2;
+          default:
+            return Display.GroundTile
+        };
+    }));
     game.mapItems.forEach((mapItem)=>{
       tiles[mapItem.down][mapItem.right] = Display.FoodTile;
     });
@@ -480,12 +496,13 @@ On unit tests:
     const player = new Player(1,1);
     const food2 = new Food(5);
     const mapItem2 = new MapItem(food2, 1,0);
-    const game = new Game([[0,0,0],[0,0,0],[0,0,0]], player, [mapItem, mapItem2]);
+    const game = new Game([[Ground.Grass1,0,Ground.Grass2],[0,0,0],[0,0,0]], player, [mapItem, mapItem2]);
     const tiles = generateTiles(game);
-    assert(tiles[0][0] === Display.GroundTile, `${errMsg} for ground`);
+    assert(tiles[0][0] === Display.GrassTile1, `${errMsg} for grass tile 1`);
     assert(tiles[1][1] === Display.PlayerTile, `${errMsg} for player`);
     assert(tiles[1][0] === Display.FoodTile, `${errMsg} for food`);
     assert(tiles[0][1] === Display.FoodTile, `${errMsg} for food`);
+    assert(tiles[0][2] === Display.GrassTile2, `${errMsg} for grass tile 2`);
   }
   {
     
@@ -547,14 +564,18 @@ On unit tests:
     var tiles = tiles.map((lines) => lines.map(tile => {
         switch(tile){
           case Display.GroundTile:
-          return ",";
+            return ".";
+          case Display.GrassTile1:
+            return "'";
+          case Display.GrassTile2:
+            return "\"";
           case Display.PlayerTile:
-          return "@";
+            return "@";
           case Display.FoodTile:
-          return "o";
+            return "o";
         }
       }
-      ).join("")).join("\n");
+      ).join(" ")).join("\n");
     return tiles;
   };
   
@@ -573,7 +594,7 @@ On unit tests:
     }
     
     render(){
-      const tiles = generateTiles(game, 3);
+      const tiles = generateTiles(game, 10);
       mapElem.textContent = render(tiles);
       hpElem.textContent = `${game.player.hp}/${game.player.maxHp}`;
       hungerElem.textContent = `${game.player.hunger}/${game.player.maxHunger}`;
@@ -586,8 +607,9 @@ On unit tests:
       inventoryElem.replaceChildren(...inventoryListItems);
     }
   }
-  const player = new Player(0, 0, 100, 100, []);
-  const map = new Array(30).fill().map(_ => new Array(30).fill(0))
+  const player = new Player(50, 50, 100, 100, []);
+  const map = [...Array(100)].map(_ => [...Array(100)].map(_ => Math.random() > 0.1 ? Ground.Grass1 : Ground.Grass2));
+  console.log(map)
   const game = new Game(map, player, [], 0.1);
   const engine = new Engine(game);
   engine.render();
