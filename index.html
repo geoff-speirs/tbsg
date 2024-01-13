@@ -608,8 +608,7 @@ On unit tests:
     }
   }
   const player = new Player(50, 50, 100, 100, []);
-  const map = [...Array(100)].map(_ => [...Array(100)].map(_ => Math.random() > 0.1 ? Ground.Grass1 : Ground.Grass2));
-  console.log(map)
+  const map = [...Array(100)].map(_ => [...Array(100)].map(_ => Math.random() > 0.05 ? Ground.Grass1 : Ground.Grass2));
   const game = new Game(map, player, [], 0.1);
   const engine = new Engine(game);
   engine.render();
